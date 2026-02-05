@@ -1,0 +1,13 @@
+name = "streamflix-api"
+main = "worker.ts"
+compatibility_date = "2023-10-02"
+
+[vars]
+SUPABASE_URL = "https://your-project.supabase.co"
+R2_BUCKET_NAME = "streamflix-videos"
+
+# Note: Secrets (keys) should be added via `wrangler secret put`
+# SUPABASE_SERVICE_ROLE_KEY
+# R2_ACCOUNT_ID
+# R2_ACCESS_KEY_ID
+# R2_SECRET_ACCESS_KEY

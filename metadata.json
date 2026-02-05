@@ -1,0 +1,5 @@
+{
+  "name": "StreamFLIX",
+  "description": "A high-performance Netflix-clone utilizing React, Tailwind, Supabase, and Cloudflare R2 architecture.",
+  "requestFramePermissions": []
+}
