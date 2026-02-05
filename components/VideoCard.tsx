@@ -42,8 +42,8 @@ const VideoCardComponent: React.FC<VideoCardProps> = ({ video, isLarge = false }
       )}
       
       {/* Hover Info Overlay */}
-      <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4">
-        <div className="flex gap-3 mb-2 scale-0 group-hover:scale-100 transition-transform duration-300 delay-100">
+      <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 md:p-4">
+        <div className="flex gap-3 mb-2 scale-95 group-hover:scale-100 transition-transform duration-300">
           <button className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-gray-200">
             <Play className="w-4 h-4 fill-current ml-0.5" />
           </button>
@@ -57,8 +57,8 @@ const VideoCardComponent: React.FC<VideoCardProps> = ({ video, isLarge = false }
             <Info className="w-4 h-4" />
           </button>
         </div>
-        <h3 className="text-white font-bold text-sm text-center line-clamp-2 px-2 leading-tight">{video.title}</h3>
-        <div className="flex gap-2 text-[10px] text-gray-300 mt-2 items-center">
+        <h3 className="text-white font-bold text-sm line-clamp-2 leading-tight">{video.title}</h3>
+        <div className="flex flex-wrap gap-2 text-[10px] text-gray-300 mt-2 items-center">
            <span className="text-green-400 font-bold">98% Match</span>
            <span className="border border-gray-500 px-1 rounded">{video.rating || '16+'}</span>
            <span>{Math.floor(video.duration / 60)}m</span>
