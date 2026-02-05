@@ -43,25 +43,25 @@ export const Home = () => {
       
       {/* Hero Section */}
       {featuredVideo && (
-        <div className="relative h-[56.25vw] md:h-[85vh] w-full">
+        <div className="relative h-[70vh] min-h-[460px] md:h-[85vh] w-full">
            <div className="absolute top-0 left-0 w-full h-full">
              <img 
                 src={featuredVideo.thumbnail_url} 
                 alt={featuredVideo.title}
                 className="w-full h-full object-cover"
              />
-             <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-transparent to-transparent"></div>
-             <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent"></div>
+             <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-[#141414]/30 to-transparent"></div>
+             <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/50 to-transparent"></div>
            </div>
 
-           <div className="absolute top-[30%] md:top-[40%] left-4 md:left-12 max-w-xl space-y-4">
-              <h1 className="text-3xl md:text-6xl font-extrabold drop-shadow-lg text-white">
+           <div className="absolute left-4 right-4 bottom-14 md:left-12 md:right-auto md:bottom-24 max-w-xl space-y-4">
+              <h1 className="text-2xl sm:text-3xl md:text-6xl font-extrabold drop-shadow-lg text-white leading-tight">
                 {featuredVideo.title}
               </h1>
-              <p className="text-white text-sm md:text-lg drop-shadow-md line-clamp-3">
+              <p className="text-white/95 text-sm md:text-lg drop-shadow-md line-clamp-4 md:line-clamp-3">
                 {featuredVideo.description}
               </p>
-              <div className="flex space-x-3 mt-4">
+              <div className="flex flex-wrap gap-3 mt-4">
                  <button 
                   onClick={() => navigate(`/watch/${featuredVideo.slug}`)}
                   className="flex items-center gap-2 bg-white text-black px-6 md:px-8 py-2 md:py-3 rounded font-bold hover:bg-gray-200 transition"
@@ -79,7 +79,7 @@ export const Home = () => {
         </div>
       )}
 
-      <div className="-mt-10 md:-mt-32 relative z-10 pl-4 md:pl-0 space-y-8">
+      <div className="relative z-10 -mt-12 md:-mt-24 pl-0 space-y-8">
         {categories.map((cat) => (
           <Row key={cat.id} title={cat.title} videos={cat.videos} isLarge={cat.slug === 'trending'} />
         ))}
