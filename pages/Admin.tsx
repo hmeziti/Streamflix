@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, RefreshCw, ArrowLeft, Save, HardDrive, Share2, PlayCircle, Upload, X, Image as ImageIcon, Pencil } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Save, HardDrive, Share2, PlayCircle, Upload, X, Pencil, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
 import { Video } from '../types';
 
@@ -8,7 +8,6 @@ export const Admin = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [syncing, setSyncing] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   
   // State pour gérer l'édition
@@ -44,18 +43,6 @@ export const Admin = () => {
       console.error(e);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSync = async () => {
-    setSyncing(true);
-    try {
-      await api.adminSyncCatalog();
-      alert('Catalogue synchronisé !');
-    } catch (e) {
-      alert('Échec de la synchro');
-    } finally {
-      setSyncing(false);
     }
   };
 
@@ -184,14 +171,6 @@ export const Admin = () => {
              <h1 className="text-xl font-bold text-white">Console Admin</h1>
          </div>
          <div className="flex gap-3">
-             <button 
-                onClick={handleSync}
-                disabled={syncing}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 disabled:opacity-50"
-             >
-                <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-                Synchroniser
-             </button>
              <button 
                 onClick={() => { resetForm(); setShowForm(true); }}
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded hover:bg-red-700 font-bold"
@@ -398,7 +377,7 @@ export const Admin = () => {
                           >
                               {uploadingImage ? (
                                 <>
-                                  <RefreshCw className="w-4 h-4 animate-spin" /> Upload...
+                                  <Loader2 className="w-4 h-4 animate-spin" /> Upload...
                                 </>
                               ) : (
                                 <>

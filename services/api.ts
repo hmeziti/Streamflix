@@ -9,6 +9,29 @@ const DB_VERSION = 1;
 const STORE_VIDEOS = 'videos';
 const STORE_CATEGORIES = 'categories';
 
+const LOCAL_STORAGE_KEY = 'streamflix-mock-catalog';
+
+const loadCatalogFromLocalStorage = (): { videos: Video[]; categories: Category[] } | null => {
+  try {
+    const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { videos?: Video[]; categories?: Category[] };
+    if (!Array.isArray(parsed.videos) || !Array.isArray(parsed.categories)) return null;
+    return { videos: parsed.videos, categories: parsed.categories };
+  } catch {
+    return null;
+  }
+};
+
+const saveCatalogToLocalStorage = (videos: Video[], categories: Category[]): void => {
+  try {
+    window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ videos, categories }));
+  } catch {
+    // Ignore storage quota / privacy mode errors
+  }
+};
+
+
 // --- Gestionnaire IndexedDB pour le mode Mock ---
 
 const openDB = (): Promise<IDBDatabase> => {
@@ -54,17 +77,28 @@ const performTransaction = async <T>(
 const getInitialData = async () => {
   const videos = await performTransaction<Video[]>(STORE_VIDEOS, 'readonly', (s) => s.getAll());
   const categories = await performTransaction<Category[]>(STORE_CATEGORIES, 'readonly', (s) => s.getAll());
-  
-  if (videos.length === 0 && categories.length === 0) {
-    // Premier démarrage : on peuple avec les mocks
+
+  if (videos.length > 0 || categories.length > 0) {
+    saveCatalogToLocalStorage(videos, categories);
+    return { videos, categories };
+  }
+
+  const localCatalog = loadCatalogFromLocalStorage();
+  if (localCatalog) {
     const db = await openDB();
     const tx = db.transaction([STORE_VIDEOS, STORE_CATEGORIES], 'readwrite');
-    MOCK_VIDEOS.forEach(v => tx.objectStore(STORE_VIDEOS).add(v));
-    MOCK_CATEGORIES.forEach(c => tx.objectStore(STORE_CATEGORIES).add(c));
-    return { videos: MOCK_VIDEOS, categories: MOCK_CATEGORIES };
+    localCatalog.videos.forEach(v => tx.objectStore(STORE_VIDEOS).put(v));
+    localCatalog.categories.forEach(c => tx.objectStore(STORE_CATEGORIES).put(c));
+    return localCatalog;
   }
-  
-  return { videos, categories };
+
+  // Premier démarrage : on peuple avec les mocks
+  const db = await openDB();
+  const tx = db.transaction([STORE_VIDEOS, STORE_CATEGORIES], 'readwrite');
+  MOCK_VIDEOS.forEach(v => tx.objectStore(STORE_VIDEOS).add(v));
+  MOCK_CATEGORIES.forEach(c => tx.objectStore(STORE_CATEGORIES).add(c));
+  saveCatalogToLocalStorage(MOCK_VIDEOS, MOCK_CATEGORIES);
+  return { videos: MOCK_VIDEOS, categories: MOCK_CATEGORIES };
 };
 
 // --- API Implementation ---
@@ -139,7 +173,11 @@ export const api = {
         categories[0].videos.unshift(newVideo);
         await performTransaction(STORE_CATEGORIES, 'readwrite', (s) => s.put(categories[0]));
       }
-      
+
+      const latestVideos = await performTransaction<Video[]>(STORE_VIDEOS, 'readonly', (s) => s.getAll());
+      const latestCategories = await performTransaction<Category[]>(STORE_CATEGORIES, 'readonly', (s) => s.getAll());
+      saveCatalogToLocalStorage(latestVideos, latestCategories);
+
       return newVideo;
     }
     const res = await fetch(`${WORKER_URL}/api/admin/videos`, {
@@ -166,6 +204,8 @@ export const api = {
             await performTransaction(STORE_CATEGORIES, 'readwrite', (s) => s.put(cat));
           }
         }
+        const latestVideos = await performTransaction<Video[]>(STORE_VIDEOS, 'readonly', (s) => s.getAll());
+        saveCatalogToLocalStorage(latestVideos, categories);
       }
       return;
     }
@@ -184,21 +224,12 @@ export const api = {
         cat.videos = cat.videos.filter(v => v.id !== id);
         await performTransaction(STORE_CATEGORIES, 'readwrite', (s) => s.put(cat));
       }
+      const latestVideos = await performTransaction<Video[]>(STORE_VIDEOS, 'readonly', (s) => s.getAll());
+      const latestCategories = await performTransaction<Category[]>(STORE_CATEGORIES, 'readonly', (s) => s.getAll());
+      saveCatalogToLocalStorage(latestVideos, latestCategories);
       return;
     }
     await fetch(`${WORKER_URL}/api/admin/videos/${id}`, { method: 'DELETE' });
-  },
-
-  adminSyncCatalog: async (): Promise<void> => {
-    if (isMockMode) {
-      const db = await openDB();
-      const tx = db.transaction([STORE_VIDEOS, STORE_CATEGORIES], 'readwrite');
-      tx.objectStore(STORE_VIDEOS).clear();
-      tx.objectStore(STORE_CATEGORIES).clear();
-      window.location.reload();
-      return;
-    }
-    await fetch(`${WORKER_URL}/api/admin/sync`, { method: 'POST' });
   },
 
   uploadThumbnail: async (file: File): Promise<string> => {
