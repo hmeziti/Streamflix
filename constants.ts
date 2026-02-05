@@ -79,6 +79,19 @@ export const MOCK_VIDEOS: Video[] = [
     slug: 'jeune-intermittent-atout-vimeo',
     rating: 'G',
     genre: ['Nutrition', 'Santé'],
+  },
+  {
+    id: 'z2h-7',
+    title: '02 Umar Faruq Hd',
+    description: 'Vidéo ajoutée depuis Vidmoly.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80',
+    video_key: 'njq5pdzx5998',
+    source_type: 'vidmoly',
+    duration: 3600,
+    year: 2024,
+    slug: '02-umar-faruq-hd',
+    rating: 'G',
+    genre: ['Programme'],
   }
 ];
 
@@ -87,7 +100,7 @@ export const MOCK_CATEGORIES: Category[] = [
     id: 'cat-featured',
     title: 'Programme Zero to Hero',
     slug: 'featured',
-    videos: [MOCK_VIDEOS[0], MOCK_VIDEOS[2], MOCK_VIDEOS[3]]
+    videos: [MOCK_VIDEOS[0], MOCK_VIDEOS[2], MOCK_VIDEOS[3], MOCK_VIDEOS[6]]
   },
   {
     id: 'cat-nutrition',
