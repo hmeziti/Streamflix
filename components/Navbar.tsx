@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Search, Bell, User, LogOut } from 'lucide-react';
 import { isMockMode, supabase } from '../services/supabase';
 
@@ -38,11 +38,11 @@ export const Navbar = () => {
             STREAMFLIX
           </Link>
           <ul className="hidden md:flex space-x-4 text-sm font-medium text-gray-200">
-            <li className="hover:text-gray-400 transition cursor-pointer"><Link to="/">Home</Link></li>
-            <li className="hover:text-gray-400 transition cursor-pointer">Series</li>
-            <li className="hover:text-gray-400 transition cursor-pointer">Films</li>
-            <li className="hover:text-gray-400 transition cursor-pointer">New & Popular</li>
-            <li className="hover:text-gray-400 transition cursor-pointer">My List</li>
+            <li><NavLink to="/" className={({ isActive }) => isActive ? 'text-white' : 'hover:text-gray-400 transition'}>Home</NavLink></li>
+            <li><NavLink to="/series" className={({ isActive }) => isActive ? 'text-white' : 'hover:text-gray-400 transition'}>Series</NavLink></li>
+            <li><NavLink to="/films" className={({ isActive }) => isActive ? 'text-white' : 'hover:text-gray-400 transition'}>Films</NavLink></li>
+            <li><NavLink to="/new-popular" className={({ isActive }) => isActive ? 'text-white' : 'hover:text-gray-400 transition'}>New & Popular</NavLink></li>
+            <li><NavLink to="/my-list" className={({ isActive }) => isActive ? 'text-white' : 'hover:text-gray-400 transition'}>My List</NavLink></li>
           </ul>
         </div>
 

@@ -5,6 +5,10 @@ import { Home } from './pages/Home';
 import { Watch } from './pages/Watch';
 import { Login } from './pages/Login';
 import { Admin } from './pages/Admin';
+import { Series } from './pages/Series';
+import { Films } from './pages/Films';
+import { NewPopular } from './pages/NewPopular';
+import { MyList } from './pages/MyList';
 
 // Protected Route Component (Simplified for Demo)
 // Fix: Use React.FC with explicit children definition to resolve "missing children" property errors when using nested JSX elements.
@@ -24,6 +28,18 @@ const App = () => {
         } />
         <Route path="/search" element={
           <ProtectedRoute><Home /></ProtectedRoute>
+        } />
+        <Route path="/series" element={
+          <ProtectedRoute><Series /></ProtectedRoute>
+        } />
+        <Route path="/films" element={
+          <ProtectedRoute><Films /></ProtectedRoute>
+        } />
+        <Route path="/new-popular" element={
+          <ProtectedRoute><NewPopular /></ProtectedRoute>
+        } />
+        <Route path="/my-list" element={
+          <ProtectedRoute><MyList /></ProtectedRoute>
         } />
         <Route path="/admin" element={
           <ProtectedRoute><Admin /></ProtectedRoute>
