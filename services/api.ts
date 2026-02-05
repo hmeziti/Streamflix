@@ -9,6 +9,15 @@ const DB_VERSION = 1;
 const STORE_VIDEOS = 'videos';
 const STORE_CATEGORIES = 'categories';
 
+const requestJson = async <T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> => {
+  const response = await fetch(input, init);
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json() as Promise<T>;
+};
+
 // --- Gestionnaire IndexedDB pour le mode Mock ---
 
 const openDB = (): Promise<IDBDatabase> => {
@@ -74,15 +83,15 @@ export const api = {
     if (isMockMode) {
       await new Promise(r => setTimeout(r, 300));
       const { videos, categories } = await getInitialData();
+      const videosById = new Map(videos.map((video) => [video.id, video]));
       
       // On s'assure que les catégories renvoient les dernières versions des vidéos par ID
       return categories.map((cat: Category) => ({
         ...cat,
-        videos: cat.videos.map((v: Video) => videos.find((rv: Video) => rv.id === v.id) || v)
+        videos: cat.videos.map((v: Video) => videosById.get(v.id) || v)
       }));
     }
-    const res = await fetch(`${WORKER_URL}/api/videos/home`);
-    return res.json();
+    return requestJson<Category[]>(`${WORKER_URL}/api/videos/home`);
   },
 
   getVideoDetails: async (slug: string): Promise<Video | null> => {
@@ -90,8 +99,7 @@ export const api = {
       const { videos } = await getInitialData();
       return videos.find((v: Video) => v.slug === slug) || null;
     }
-    const res = await fetch(`${WORKER_URL}/api/videos/${slug}`);
-    return res.json();
+    return requestJson<Video | null>(`${WORKER_URL}/api/videos/${slug}`);
   },
 
   getPlaybackUrl: async (slug: string): Promise<string> => {
@@ -119,8 +127,7 @@ export const api = {
       const { videos } = await getInitialData();
       return videos;
     }
-    const res = await fetch(`${WORKER_URL}/api/admin/videos`);
-    return res.json();
+    return requestJson<Video[]>(`${WORKER_URL}/api/admin/videos`);
   },
 
   adminCreateVideo: async (video: Partial<Video>): Promise<Video> => {
@@ -142,12 +149,11 @@ export const api = {
       
       return newVideo;
     }
-    const res = await fetch(`${WORKER_URL}/api/admin/videos`, {
+    return requestJson<Video>(`${WORKER_URL}/api/admin/videos`, {
       method: 'POST',
       body: JSON.stringify(video),
       headers: { 'Content-Type': 'application/json' }
     });
-    return res.json();
   },
 
   adminUpdateVideo: async (id: string, videoData: Partial<Video>): Promise<void> => {
@@ -169,7 +175,7 @@ export const api = {
       }
       return;
     }
-    await fetch(`${WORKER_URL}/api/admin/videos/${id}`, {
+    await requestJson(`${WORKER_URL}/api/admin/videos/${id}`, {
       method: 'PUT',
       body: JSON.stringify(videoData),
       headers: { 'Content-Type': 'application/json' }
@@ -186,7 +192,7 @@ export const api = {
       }
       return;
     }
-    await fetch(`${WORKER_URL}/api/admin/videos/${id}`, { method: 'DELETE' });
+    await requestJson(`${WORKER_URL}/api/admin/videos/${id}`, { method: 'DELETE' });
   },
 
   adminSyncCatalog: async (): Promise<void> => {
@@ -198,7 +204,7 @@ export const api = {
       window.location.reload();
       return;
     }
-    await fetch(`${WORKER_URL}/api/admin/sync`, { method: 'POST' });
+    await requestJson(`${WORKER_URL}/api/admin/sync`, { method: 'POST' });
   },
 
   uploadThumbnail: async (file: File): Promise<string> => {

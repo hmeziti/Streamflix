@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, Info, Plus, ImageOff } from 'lucide-react';
 import { Video } from '../types';
@@ -8,14 +8,23 @@ interface VideoCardProps {
   isLarge?: boolean;
 }
 
-export const VideoCard: React.FC<VideoCardProps> = ({ video, isLarge = false }) => {
+const VideoCardComponent: React.FC<VideoCardProps> = ({ video, isLarge = false }) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
+
+  const handleWatchNavigation = useCallback(() => {
+    navigate(`/watch/${video.slug}`);
+  }, [navigate, video.slug]);
+
+  const handleInfoNavigation = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    navigate(`/title/${video.slug}`);
+  }, [navigate, video.slug]);
 
   return (
     <div 
       className={`group relative flex-none bg-[#1f1f1f] rounded-md overflow-hidden cursor-pointer transition-transform duration-300 hover:z-10 hover:scale-110 ${isLarge ? 'w-48 h-72' : 'w-72 h-40'}`}
-      onClick={() => navigate(`/watch/${video.slug}`)}
+      onClick={handleWatchNavigation}
     >
       {imgError ? (
         <div className="w-full h-full bg-[#1f1f1f] border border-gray-800 flex flex-col items-center justify-center p-4">
@@ -43,10 +52,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isLarge = false }) 
           </button>
           <button 
             className="w-8 h-8 rounded-full border-2 border-gray-400 text-gray-400 flex items-center justify-center hover:border-white hover:text-white"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/title/${video.slug}`);
-            }}
+            onClick={handleInfoNavigation}
           >
             <Info className="w-4 h-4" />
           </button>
@@ -61,3 +67,5 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isLarge = false }) 
     </div>
   );
 };
+
+export const VideoCard = memo(VideoCardComponent);
