@@ -49,6 +49,9 @@ export const Home = () => {
                 src={featuredVideo.thumbnail_url} 
                 alt={featuredVideo.title}
                 className="w-full h-full object-cover"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
              />
              <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-transparent to-transparent"></div>
              <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent"></div>
