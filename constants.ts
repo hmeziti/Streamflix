@@ -170,6 +170,19 @@ export const MOCK_VIDEOS: Video[] = [
     slug: 'chapitre-2',
     rating: 'G',
     genre: ['Programme'],
+  },
+  {
+    id: 'z2h-14',
+    title: 'Chapitre 3',
+    description: 'Vidéo ajoutée depuis Vidmoly.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80',
+    video_key: 'gbh90xfna2zf',
+    source_type: 'vidmoly',
+    duration: 3600,
+    year: 2024,
+    slug: 'chapitre-3',
+    rating: 'G',
+    genre: ['Programme'],
   }
 ];
 
@@ -181,65 +194,28 @@ export const MOCK_CATEGORIES: Category[] = [
     videos: [...MOCK_VIDEOS]
   },
   {
-    id: 'cat-featured',
-    title: 'Programme Zero to Hero',
-    slug: 'featured',
+    id: 'cat-hitchenz',
+    title: 'Hitchenz',
+    slug: 'hitchenz',
+    videos: [MOCK_VIDEOS[11], MOCK_VIDEOS[12], MOCK_VIDEOS[13]]
+  },
+  {
+    id: 'cat-institutional-fx',
+    title: 'Institutional FX',
+    slug: 'institutional-fx',
+    videos: [MOCK_VIDEOS[7], MOCK_VIDEOS[8], MOCK_VIDEOS[9], MOCK_VIDEOS[10]]
+  },
+  {
+    id: 'cat-raptor',
+    title: 'Raptor',
+    slug: 'raptor',
     videos: [
       MOCK_VIDEOS[0],
       MOCK_VIDEOS[1],
       MOCK_VIDEOS[2],
       MOCK_VIDEOS[3],
       MOCK_VIDEOS[4],
-      MOCK_VIDEOS[5],
-      MOCK_VIDEOS[6],
-      MOCK_VIDEOS[7],
-      MOCK_VIDEOS[8],
-      MOCK_VIDEOS[9],
-      MOCK_VIDEOS[10],
-      MOCK_VIDEOS[11],
-      MOCK_VIDEOS[12]
+      MOCK_VIDEOS[5]
     ]
-  },
-  {
-    id: 'cat-mentorat',
-    title: 'Mentorat',
-    slug: 'mentorat',
-    videos: [MOCK_VIDEOS[7]]
-  },
-  {
-    id: 'cat-structure',
-    title: 'Structure',
-    slug: 'structure',
-    videos: [MOCK_VIDEOS[8], MOCK_VIDEOS[10]]
-  },
-  {
-    id: 'cat-bases',
-    title: 'Grandes bases',
-    slug: 'grandes-bases',
-    videos: [MOCK_VIDEOS[9]]
-  },
-  {
-    id: 'cat-chapitres',
-    title: 'Chapitres',
-    slug: 'chapitres',
-    videos: [MOCK_VIDEOS[11], MOCK_VIDEOS[12]]
-  },
-  {
-    id: 'cat-nutrition',
-    title: 'Nutrition & Diététique',
-    slug: 'nutrition',
-    videos: [MOCK_VIDEOS[3], MOCK_VIDEOS[2], MOCK_VIDEOS[5]]
-  },
-  {
-    id: 'cat-training',
-    title: 'Entraînement & Théorie',
-    slug: 'training',
-    videos: [MOCK_VIDEOS[0], MOCK_VIDEOS[4]]
-  },
-  {
-    id: 'cat-health',
-    title: 'Santé & Équilibre Hormonal',
-    slug: 'health',
-    videos: [MOCK_VIDEOS[1]]
   }
 ];
