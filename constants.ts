@@ -92,6 +92,32 @@ export const MOCK_VIDEOS: Video[] = [
     slug: '02-umar-faruq-hd',
     rating: 'G',
     genre: ['Programme'],
+  },
+  {
+    id: 'z2h-8',
+    title: 'Vidmoly - Session 1',
+    description: 'Vidéo ajoutée depuis Vidmoly.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1517602302552-471fe67acf66?auto=format&fit=crop&w=800&q=80',
+    video_key: 'https://vidmoly.net/embed-63jfan2hhzoi.html',
+    source_type: 'vidmoly',
+    duration: 3600,
+    year: 2024,
+    slug: 'vidmoly-session-1',
+    rating: 'G',
+    genre: ['Programme'],
+  },
+  {
+    id: 'z2h-9',
+    title: 'Vidmoly - Session 2',
+    description: 'Vidéo ajoutée depuis Vidmoly.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80',
+    video_key: 'https://vidmoly.net/embed-ii92vm7emm1r.html',
+    source_type: 'vidmoly',
+    duration: 3600,
+    year: 2024,
+    slug: 'vidmoly-session-2',
+    rating: 'G',
+    genre: ['Programme'],
   }
 ];
 
@@ -100,7 +126,7 @@ export const MOCK_CATEGORIES: Category[] = [
     id: 'cat-featured',
     title: 'Programme Zero to Hero',
     slug: 'featured',
-    videos: [MOCK_VIDEOS[0], MOCK_VIDEOS[2], MOCK_VIDEOS[3], MOCK_VIDEOS[6]]
+    videos: [MOCK_VIDEOS[0], MOCK_VIDEOS[2], MOCK_VIDEOS[3], MOCK_VIDEOS[6], MOCK_VIDEOS[7], MOCK_VIDEOS[8]]
   },
   {
     id: 'cat-nutrition',
