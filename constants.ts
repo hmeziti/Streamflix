@@ -4,7 +4,7 @@ import { Category, Video } from './types';
 export const MOCK_VIDEOS: Video[] = [
   {
     id: 'z2h-1',
-    title: "Les Techniques d'Intensification",
+    title: 'Les Techniques d Intensification Zero to Hero',
     description: "Apprenez les méthodes avancées pour maximiser votre intensité d'entraînement et briser vos plateaux. Une masterclass sur le dépassement de soi.",
     thumbnail_url: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=80', // Gym intense
     video_key: '4pvdbj19xv02', 
@@ -17,7 +17,7 @@ export const MOCK_VIDEOS: Video[] = [
   },
   {
     id: 'z2h-2',
-    title: "Santé, Hormones, Énergie",
+    title: 'Santé, Hormones, Energie - La Gamme Equilibre',
     description: "Comprendre le fonctionnement hormonal pour optimiser votre énergie quotidienne et votre santé globale. L'équilibre est la clé du succès.",
     thumbnail_url: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&w=800&q=80', // Healthy Lifestyle / Yoga vibe
     video_key: 'g5vww3teqwu3', 
@@ -30,7 +30,7 @@ export const MOCK_VIDEOS: Video[] = [
   },
   {
     id: 'z2h-3',
-    title: "FAQs - Nutrition Zero to Hero",
+    title: 'FAQs - Nutrition Zero to Hero',
     description: "Toutes les réponses à vos questions les plus fréquentes sur l'alimentation, les compléments et la gestion des macros.",
     thumbnail_url: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80', // Interview / Meeting
     video_key: 'o8aswxwhbgdd', 
@@ -43,7 +43,7 @@ export const MOCK_VIDEOS: Video[] = [
   },
   {
     id: 'z2h-4',
-    title: "La Diète la Plus Agréable",
+    title: 'La Diète la Plus Agréable de Votre Vie (1)',
     description: "Comment structurer votre alimentation pour qu'elle soit durable, efficace et surtout plaisante au quotidien.",
     thumbnail_url: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80', // Healthy Food Bowl
     video_key: 'a7k4i9dgyp2j', 
@@ -56,7 +56,7 @@ export const MOCK_VIDEOS: Video[] = [
   },
   {
     id: 'z2h-5',
-    title: "Comprendre la Nutrition et l'Entraînement",
+    title: "Comprendre la Nutrition et l'Entraînement on Vimeo",
     description: "Les fondamentaux théoriques indispensables pour lier intelligemment vos efforts en cuisine et à la salle.",
     thumbnail_url: 'https://images.unsplash.com/photo-1532029837062-47194a8ce4df?auto=format&fit=crop&w=800&q=80', // Books / Learning / Gym theory
     video_key: '06gus5xbza9c', 
@@ -69,7 +69,7 @@ export const MOCK_VIDEOS: Video[] = [
   },
   {
     id: 'z2h-6',
-    title: "Le Jeûne Intermittent",
+    title: 'Un Atout Phénoménal - Le Jeûne Intermittent on Vimeo',
     description: "Exploration complète des bénéfices du jeûne intermittent pour la perte de gras et la clarté mentale.",
     thumbnail_url: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80', // Body / Health / Science
     video_key: 'xfobjhrsxzzw', 
@@ -95,53 +95,79 @@ export const MOCK_VIDEOS: Video[] = [
   },
   {
     id: 'z2h-8',
-    title: 'Vidmoly - Session 1',
+    title: '1 COMMENT ABORDER CE MENTORAT',
     description: 'Vidéo ajoutée depuis Vidmoly.',
     thumbnail_url: 'https://images.unsplash.com/photo-1517602302552-471fe67acf66?auto=format&fit=crop&w=800&q=80',
     video_key: 'w10v3zrn2t9n',
     source_type: 'vidmoly',
     duration: 3600,
     year: 2024,
-    slug: 'vidmoly-session-1',
+    slug: 'comment-aborder-ce-mentorat',
     rating: 'G',
     genre: ['Programme'],
   },
   {
     id: 'z2h-9',
-    title: 'Vidmoly - Session 2',
+    title: 'STRUCTURE 1',
     description: 'Vidéo ajoutée depuis Vidmoly.',
     thumbnail_url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80',
     video_key: 'mmnsj1ct6xet',
     source_type: 'vidmoly',
     duration: 3600,
     year: 2024,
-    slug: 'vidmoly-session-2',
+    slug: 'structure-1',
     rating: 'G',
     genre: ['Programme'],
   },
   {
     id: 'z2h-10',
-    title: 'Vidmoly - Session 3',
+    title: 'LES GRANDES BASES À CONNAÎTRE',
     description: 'Vidéo ajoutée depuis Vidmoly.',
     thumbnail_url: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=800&q=80',
     video_key: 'bhb88lyw6f0a',
     source_type: 'vidmoly',
     duration: 3600,
     year: 2024,
-    slug: 'vidmoly-session-3',
+    slug: 'les-grandes-bases-a-connaitre',
     rating: 'G',
     genre: ['Programme'],
   },
   {
     id: 'z2h-11',
-    title: 'Vidmoly - Session 4',
+    title: 'STRUCTURE 2 Fractalitė',
     description: 'Vidéo ajoutée depuis Vidmoly.',
     thumbnail_url: 'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=800&q=80',
     video_key: 'cljegri9l4dn',
     source_type: 'vidmoly',
     duration: 3600,
     year: 2024,
-    slug: 'vidmoly-session-4',
+    slug: 'structure-2-fractalite',
+    rating: 'G',
+    genre: ['Programme'],
+  },
+  {
+    id: 'z2h-12',
+    title: 'Chapitre 1 1',
+    description: 'Vidéo ajoutée depuis Vidmoly.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=800&q=80',
+    video_key: '63jfan2hhzoi',
+    source_type: 'vidmoly',
+    duration: 3600,
+    year: 2024,
+    slug: 'chapitre-1-1',
+    rating: 'G',
+    genre: ['Programme'],
+  },
+  {
+    id: 'z2h-13',
+    title: 'Chapitre 2',
+    description: 'Vidéo ajoutée depuis Vidmoly.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80',
+    video_key: 'ii92vm7emm1r',
+    source_type: 'vidmoly',
+    duration: 3600,
+    year: 2024,
+    slug: 'chapitre-2',
     rating: 'G',
     genre: ['Programme'],
   }
@@ -149,19 +175,54 @@ export const MOCK_VIDEOS: Video[] = [
 
 export const MOCK_CATEGORIES: Category[] = [
   {
+    id: 'cat-all',
+    title: 'Toutes les vidéos',
+    slug: 'toutes-les-videos',
+    videos: [...MOCK_VIDEOS]
+  },
+  {
     id: 'cat-featured',
     title: 'Programme Zero to Hero',
     slug: 'featured',
     videos: [
       MOCK_VIDEOS[0],
+      MOCK_VIDEOS[1],
       MOCK_VIDEOS[2],
       MOCK_VIDEOS[3],
+      MOCK_VIDEOS[4],
+      MOCK_VIDEOS[5],
       MOCK_VIDEOS[6],
       MOCK_VIDEOS[7],
       MOCK_VIDEOS[8],
       MOCK_VIDEOS[9],
-      MOCK_VIDEOS[10]
+      MOCK_VIDEOS[10],
+      MOCK_VIDEOS[11],
+      MOCK_VIDEOS[12]
     ]
+  },
+  {
+    id: 'cat-mentorat',
+    title: 'Mentorat',
+    slug: 'mentorat',
+    videos: [MOCK_VIDEOS[7]]
+  },
+  {
+    id: 'cat-structure',
+    title: 'Structure',
+    slug: 'structure',
+    videos: [MOCK_VIDEOS[8], MOCK_VIDEOS[10]]
+  },
+  {
+    id: 'cat-bases',
+    title: 'Grandes bases',
+    slug: 'grandes-bases',
+    videos: [MOCK_VIDEOS[9]]
+  },
+  {
+    id: 'cat-chapitres',
+    title: 'Chapitres',
+    slug: 'chapitres',
+    videos: [MOCK_VIDEOS[11], MOCK_VIDEOS[12]]
   },
   {
     id: 'cat-nutrition',
