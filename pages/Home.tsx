@@ -10,6 +10,7 @@ export const Home = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [featuredVideo, setFeaturedVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,6 +18,7 @@ export const Home = () => {
       try {
         const data = await api.getHomeData();
         setCategories(data);
+        setActiveCategoryId(data[0]?.id ?? null);
         if (data.length > 0 && data[0].videos.length > 0) {
           setFeaturedVideo(data[0].videos[0]);
         }
@@ -36,6 +38,8 @@ export const Home = () => {
       </div>
     );
   }
+
+  const activeCategory = categories.find((category) => category.id === activeCategoryId) ?? categories[0];
 
   return (
     <div className="min-h-screen bg-background pb-10">
@@ -80,9 +84,33 @@ export const Home = () => {
       )}
 
       <div className="-mt-10 md:-mt-32 relative z-10 pl-4 md:pl-0 space-y-8">
-        {categories.map((cat) => (
-          <Row key={cat.id} title={cat.title} videos={cat.videos} isLarge={cat.slug === 'trending'} />
-        ))}
+        <div className="flex flex-wrap gap-2 px-4 md:px-12">
+          {categories.map((category) => {
+            const isActive = category.id === activeCategory?.id;
+            return (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => setActiveCategoryId(category.id)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  isActive
+                    ? 'bg-white text-black'
+                    : 'bg-white/10 text-gray-200 hover:bg-white/20'
+                }`}
+              >
+                {category.title}
+              </button>
+            );
+          })}
+        </div>
+        {activeCategory && (
+          <Row
+            key={activeCategory.id}
+            title={activeCategory.title}
+            videos={activeCategory.videos}
+            isLarge={activeCategory.slug === 'trending'}
+          />
+        )}
       </div>
     </div>
   );
