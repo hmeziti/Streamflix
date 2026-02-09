@@ -79,7 +79,7 @@ export const Home = () => {
         </div>
       )}
 
-      <div className="-mt-10 md:-mt-32 relative z-10 pl-4 md:pl-0 space-y-8">
+      <div className="mt-6 md:mt-12 relative z-10 pl-4 md:pl-0 space-y-8">
         {categories.map((cat) => (
           <Row key={cat.id} title={cat.title} videos={cat.videos} isLarge={cat.slug === 'trending'} />
         ))}
