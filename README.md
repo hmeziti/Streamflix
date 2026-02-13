@@ -1,20 +1,44 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Streamflix
 
-# Run and deploy your AI Studio app
+Streamflix est une application web de streaming fictive utilisée comme vitrine pour afficher des vidéos, des catégories et une page de lecture dédiée. Le projet sert de base de travail pour un catalogue vidéo local (mock) et des pages de navigation, avec un rendu responsive typé en TypeScript.
 
-This contains everything you need to run your app locally.
+## Fonctionnalités principales
 
-View your app in AI Studio: https://ai.studio/apps/drive/1AzFIama8jpG0DMriClx07EGpxLjbZZPY
+- **Page d’accueil** avec sections de contenus et mise en avant d’une vidéo.
+- **Page de lecture (Watch)** pour afficher la vidéo sélectionnée.
+- **Catalogue mock** configurable dans `constants.ts` (vidéos + catégories).
+- **Interface d’administration** pour gérer les vidéos en local.
 
-## Run Locally
+## Structure du projet (aperçu)
 
-**Prerequisites:**  Node.js
+- `pages/` : pages principales (accueil, watch, admin).
+- `components/` : composants réutilisables (rows, cards, etc.).
+- `services/` : logique d’accès aux données locales et helpers.
+- `constants.ts` : données mock (vidéos et catégories).
 
+## Lancer le projet en local
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Prérequis
+
+- Node.js
+
+### Installation et démarrage
+
+```bash
+npm install
+npm run dev
+```
+
+L’application est ensuite accessible sur `http://localhost:5173`.
+
+## Configuration optionnelle
+
+Si vous utilisez des services externes (ex. Gemini), ajoutez une variable dans `.env.local` :
+
+```
+GEMINI_API_KEY=...
+```
+
+## Notes
+
+Le projet est conçu pour fonctionner même sans backend externe grâce aux données mock et au stockage local.

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, Info, Plus, ImageOff } from 'lucide-react';
 import { Video } from '../types';
+import { fallbackToVideoThumbnail, getPreferredThumbnailUrl } from '../services/thumbnails';
 
 interface VideoCardProps {
   video: Video;
@@ -11,6 +12,7 @@ interface VideoCardProps {
 export const VideoCard: React.FC<VideoCardProps> = ({ video, isLarge = false }) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
+  const primaryThumbnailUrl = getPreferredThumbnailUrl(video);
 
   return (
     <div 
@@ -24,11 +26,11 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isLarge = false }) 
         </div>
       ) : (
         <img 
-          src={video.thumbnail_url} 
+          src={primaryThumbnailUrl} 
           alt={video.title} 
           className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
           loading="lazy"
-          onError={() => setImgError(true)}
+          onError={(event) => fallbackToVideoThumbnail(event, video.thumbnail_url, () => setImgError(true))}
         />
       )}
       
