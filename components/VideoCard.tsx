@@ -8,13 +8,13 @@ interface VideoCardProps {
   isLarge?: boolean;
 }
 
-export const VideoCard: React.FC<VideoCardProps> = ({ video, isLarge = false }) => {
+const VideoCardComponent: React.FC<VideoCardProps> = ({ video, isLarge = false }) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
 
   return (
     <div 
-      className={`group relative flex-none bg-[#1f1f1f] rounded-md overflow-hidden cursor-pointer transition-transform duration-300 hover:z-10 hover:scale-110 ${isLarge ? 'w-48 h-72' : 'w-72 h-40'}`}
+      className={`group relative flex-none bg-[#1f1f1f] rounded-md overflow-hidden cursor-pointer transition-transform duration-300 hover:z-10 hover:scale-110 transform-gpu will-change-transform ${isLarge ? 'w-48 h-72' : 'w-72 h-40'}`}
       onClick={() => navigate(`/watch/${video.slug}`)}
     >
       {imgError ? (
@@ -28,6 +28,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isLarge = false }) 
           alt={video.title} 
           className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
           loading="lazy"
+          decoding="async"
           onError={() => setImgError(true)}
         />
       )}
@@ -61,3 +62,5 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isLarge = false }) 
     </div>
   );
 };
+
+export const VideoCard = React.memo(VideoCardComponent);
