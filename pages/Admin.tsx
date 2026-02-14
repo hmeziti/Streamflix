@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, ArrowLeft, Save, HardDrive, Share2, PlayCircle, Upload, X, Pencil, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
+import { LOCAL_THUMBNAILS } from '../constants';
 import { Video } from '../types';
 
 export const Admin = () => {
@@ -85,6 +86,13 @@ export const Admin = () => {
     setPreviewUrl('');
     setFormData({ ...formData, thumbnail_url: '' });
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleSelectLocalThumbnail = (thumbnailUrl: string) => {
+    setThumbnailFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    setFormData({ ...formData, thumbnail_url: thumbnailUrl });
+    setPreviewUrl(thumbnailUrl);
   };
 
   const resetForm = () => {
@@ -308,6 +316,38 @@ export const Admin = () => {
                               }}
                            />
                         </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Miniatures du dossier /public/thumbnails</label>
+                        <div className="grid grid-cols-3 gap-3">
+                          {LOCAL_THUMBNAILS.map((thumbnail) => {
+                            const isSelected = formData.thumbnail_url === thumbnail.src;
+                            return (
+                              <button
+                                key={thumbnail.id}
+                                type="button"
+                                onClick={() => handleSelectLocalThumbnail(thumbnail.src)}
+                                className={`group border rounded-lg overflow-hidden text-left transition ${isSelected ? 'border-primary ring-2 ring-primary/40' : 'border-gray-700 hover:border-gray-400'}`}
+                              >
+                                <div className="relative w-full h-20 bg-black/40">
+                                  <img src={thumbnail.src} alt={thumbnail.label} className="w-full h-full object-cover" />
+                                  {isSelected && (
+                                    <span className="absolute top-2 right-2 text-[10px] uppercase bg-primary text-white px-2 py-0.5 rounded-full">
+                                      Sélectionnée
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="px-2 py-2 text-xs text-gray-300 group-hover:text-white">
+                                  {thumbnail.label}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Ajoutez vos images dans <span className="font-mono">public/thumbnails</span> et mettez la liste à jour dans <span className="font-mono">constants.ts</span>.
+                        </p>
                       </div>
 
                       <div className="h-px bg-gray-700 my-4"></div>
