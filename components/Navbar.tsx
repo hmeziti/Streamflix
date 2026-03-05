@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, Bell, User, LogOut } from 'lucide-react';
 import { isMockMode, supabase } from '../services/supabase';
 
@@ -7,6 +7,16 @@ export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const activeSection = new URLSearchParams(location.search).get('section') || 'home';
+  const menuItems = [
+    { label: 'Home', section: 'home' },
+    { label: 'Series', section: 'series' },
+    { label: 'Films', section: 'films' },
+    { label: 'New & Popular', section: 'popular' },
+    { label: 'My List', section: 'my-list' },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,11 +48,21 @@ export const Navbar = () => {
             STREAMFLIX
           </Link>
           <ul className="hidden md:flex space-x-4 text-sm font-medium text-gray-200">
-            <li className="hover:text-gray-400 transition cursor-pointer"><Link to="/">Home</Link></li>
-            <li className="hover:text-gray-400 transition cursor-pointer">Series</li>
-            <li className="hover:text-gray-400 transition cursor-pointer">Films</li>
-            <li className="hover:text-gray-400 transition cursor-pointer">New & Popular</li>
-            <li className="hover:text-gray-400 transition cursor-pointer">My List</li>
+            {menuItems.map((item) => {
+              const isActive = activeSection === item.section;
+              const link = item.section === 'home' ? '/' : `/?section=${item.section}`;
+
+              return (
+                <li key={item.section} className="cursor-pointer">
+                  <Link
+                    to={link}
+                    className={`transition ${isActive ? 'text-white font-semibold' : 'hover:text-gray-400'}`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
 
