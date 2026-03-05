@@ -1,12 +1,17 @@
 
 import { Category, Video } from './types';
+import thumb4pv from './4pvdbj19xv02.jpg';
+import thumbG5v from './g5vww3teqwu3.jpg';
+import thumbO8a from './o8aswxwhbgdd.jpg';
+import thumbA7k from './a7k4i9dgyp2j.jpg';
+import thumbNjq from './njq5pdzx5998.jpg';
 
 export const MOCK_VIDEOS: Video[] = [
   {
     id: 'z2h-1',
     title: "Les Techniques d'Intensification",
     description: "Apprenez les méthodes avancées pour maximiser votre intensité d'entraînement et briser vos plateaux. Une masterclass sur le dépassement de soi.",
-    thumbnail_url: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=80', // Gym intense
+    thumbnail_url: thumb4pv, // Gym intense
     video_key: '4pvdbj19xv02', 
     source_type: 'vidmoly',
     duration: 3600,
@@ -19,7 +24,7 @@ export const MOCK_VIDEOS: Video[] = [
     id: 'z2h-2',
     title: "Santé, Hormones, Énergie",
     description: "Comprendre le fonctionnement hormonal pour optimiser votre énergie quotidienne et votre santé globale. L'équilibre est la clé du succès.",
-    thumbnail_url: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&w=800&q=80', // Healthy Lifestyle / Yoga vibe
+    thumbnail_url: thumbG5v, // Healthy Lifestyle / Yoga vibe
     video_key: 'g5vww3teqwu3', 
     source_type: 'vidmoly',
     duration: 4200,
@@ -32,7 +37,7 @@ export const MOCK_VIDEOS: Video[] = [
     id: 'z2h-3',
     title: "FAQs - Nutrition Zero to Hero",
     description: "Toutes les réponses à vos questions les plus fréquentes sur l'alimentation, les compléments et la gestion des macros.",
-    thumbnail_url: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80', // Interview / Meeting
+    thumbnail_url: thumbO8a, // Interview / Meeting
     video_key: 'o8aswxwhbgdd', 
     source_type: 'vidmoly',
     duration: 2800,
@@ -45,7 +50,7 @@ export const MOCK_VIDEOS: Video[] = [
     id: 'z2h-4',
     title: "La Diète la Plus Agréable",
     description: "Comment structurer votre alimentation pour qu'elle soit durable, efficace et surtout plaisante au quotidien.",
-    thumbnail_url: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80', // Healthy Food Bowl
+    thumbnail_url: thumbA7k, // Healthy Food Bowl
     video_key: 'a7k4i9dgyp2j', 
     source_type: 'vidmoly',
     duration: 3100,
@@ -84,7 +89,7 @@ export const MOCK_VIDEOS: Video[] = [
     id: 'z2h-7',
     title: '02 Umar Faruq Hd',
     description: 'Vidéo ajoutée depuis Vidmoly.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80',
+    thumbnail_url: thumbNjq,
     video_key: 'njq5pdzx5998',
     source_type: 'vidmoly',
     duration: 3600,
