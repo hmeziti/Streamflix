@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Play, Info } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
 import { Row } from '../components/Row';
@@ -11,14 +11,46 @@ export const Home = () => {
   const [featuredVideo, setFeaturedVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const activeSection = searchParams.get('section') || 'home';
+
+  const getVideosFromCategories = (cats: Category[]) => {
+    const deduped = new Map<string, Video>();
+    cats.forEach((cat) => cat.videos.forEach((video) => deduped.set(video.id, video)));
+    return Array.from(deduped.values());
+  };
+
+  const getFilteredCategories = (allCategories: Category[]) => {
+    switch (activeSection) {
+      case 'series':
+        return allCategories.filter((cat) => ['training', 'health'].includes(cat.slug));
+      case 'films':
+        return allCategories.filter((cat) => ['featured', 'nutrition'].includes(cat.slug));
+      case 'popular': {
+        const popularVideos = getVideosFromCategories(allCategories)
+          .sort((a, b) => b.year - a.year)
+          .slice(0, 8);
+        return [{ id: 'popular', title: 'New & Popular', slug: 'popular', videos: popularVideos }];
+      }
+      case 'my-list': {
+        const myListVideos = getVideosFromCategories(allCategories).slice(0, 6);
+        return [{ id: 'my-list', title: 'My List', slug: 'my-list', videos: myListVideos }];
+      }
+      default:
+        return allCategories;
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await api.getHomeData();
-        setCategories(data);
-        if (data.length > 0 && data[0].videos.length > 0) {
-          setFeaturedVideo(data[0].videos[0]);
+        const filteredData = getFilteredCategories(data);
+        setCategories(filteredData);
+        if (filteredData.length > 0 && filteredData[0].videos.length > 0) {
+          setFeaturedVideo(filteredData[0].videos[0]);
+        } else {
+          setFeaturedVideo(null);
         }
       } catch (err) {
         console.error(err);
@@ -27,7 +59,7 @@ export const Home = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [activeSection]);
 
   if (loading) {
     return (
