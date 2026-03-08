@@ -32,6 +32,55 @@ const saveCatalogToLocalStorage = (videos: Video[], categories: Category[]): voi
 };
 
 
+const DEFAULT_FALLBACK_THUMBNAIL = 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=800&q=80';
+
+const getVidmolyEmbedUrl = (videoKey: string): string => {
+  const key = videoKey.trim();
+  if (!key) return '';
+  if (key.startsWith('http')) return key;
+  const cleanId = key
+    .replace(/https?:\/\/vidmoly\.(net|to)\//, '')
+    .replace('embed-', '')
+    .replace('.html', '');
+  return `https://vidmoly.net/embed-${cleanId}.html`;
+};
+
+const extractVidmolyThumbnailFromEmbed = async (videoKey: string): Promise<string> => {
+  const embedUrl = getVidmolyEmbedUrl(videoKey);
+  if (!embedUrl) return '';
+
+  try {
+    const response = await fetch(embedUrl);
+    if (!response.ok) return '';
+    const html = await response.text();
+
+    const match = html.match(/image\s*:\s*["']([^"']+)["']/i);
+    if (!match?.[1]) return '';
+
+    const rawUrl = match[1].trim();
+    return rawUrl.startsWith('http') ? rawUrl : new URL(rawUrl, embedUrl).href;
+  } catch {
+    return '';
+  }
+};
+
+const getAutoThumbnailUrl = async (video: Partial<Video>): Promise<string> => {
+  const currentThumbnail = video.thumbnail_url?.trim();
+  if (currentThumbnail) return currentThumbnail;
+
+  if (video.source_type === 'vidmoly') {
+    const fromEmbed = await extractVidmolyThumbnailFromEmbed(video.video_key || '');
+    if (fromEmbed) return fromEmbed;
+  }
+
+  if (video.source_type === 'drive' && video.video_key?.trim()) {
+    return `https://drive.google.com/thumbnail?id=${video.video_key.trim()}&sz=w1280`;
+  }
+
+  return DEFAULT_FALLBACK_THUMBNAIL;
+};
+
+
 const mergeMockCatalog = (
   currentVideos: Video[],
   currentCategories: Category[]
@@ -189,10 +238,7 @@ export const api = {
     if (!video) return '';
 
     if (video.source_type === 'vidmoly') {
-      let key = video.video_key.trim();
-      if (key.startsWith('http')) return key;
-      const cleanId = key.replace(/https?:\/\/vidmoly\.(net|to)\//, '').replace('embed-', '').replace('.html', '');
-      return `https://vidmoly.net/embed-${cleanId}.html`;
+      return getVidmolyEmbedUrl(video.video_key);
     }
     
     if (isMockMode) {
@@ -216,7 +262,8 @@ export const api = {
   adminCreateVideo: async (video: Partial<Video>): Promise<Video> => {
     if (isMockMode) {
       const newVideo = { 
-        ...video, 
+        ...video,
+        thumbnail_url: await getAutoThumbnailUrl(video),
         id: Math.random().toString(36).substr(2, 9),
         created_at: new Date().toISOString()
       } as Video;
@@ -236,9 +283,10 @@ export const api = {
 
       return newVideo;
     }
+    const payload = { ...video, thumbnail_url: await getAutoThumbnailUrl(video) };
     const res = await fetch(`${WORKER_URL}/api/admin/videos`, {
       method: 'POST',
-      body: JSON.stringify(video),
+      body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' }
     });
     return res.json();
@@ -248,7 +296,7 @@ export const api = {
     if (isMockMode) {
       const video = await performTransaction<Video>(STORE_VIDEOS, 'readonly', (s) => s.get(id));
       if (video) {
-        const updated = { ...video, ...videoData };
+        const updated = { ...video, ...videoData, thumbnail_url: await getAutoThumbnailUrl({ ...video, ...videoData }) };
         await performTransaction(STORE_VIDEOS, 'readwrite', (s) => s.put(updated));
         
         // Mise à jour optionnelle dans les objets catégories pour la consistance immédiate
@@ -265,9 +313,10 @@ export const api = {
       }
       return;
     }
+    const payload = { ...videoData, thumbnail_url: await getAutoThumbnailUrl(videoData) };
     await fetch(`${WORKER_URL}/api/admin/videos/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(videoData),
+      body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' }
     });
   },
