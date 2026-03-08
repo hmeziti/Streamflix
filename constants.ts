@@ -6,6 +6,13 @@ import thumbO8a from './o8aswxwhbgdd.jpg';
 import thumbA7k from './a7k4i9dgyp2j.jpg';
 import thumbNjq from './njq5pdzx5998.jpg';
 
+
+const NEW_CHAPTER_THUMBNAILS = {
+  chapitre1: 'https://box-1425-t10.vmeas.cloud/i/04/02199/63jfan2hhzoi.jpg',
+  chapitre2: 'https://box-1449-v10.vmeas.cloud/i/02/02199/ii92vm7emm1r.jpg',
+  chapitre3: 'https://box-1392-h10.vmeas.cloud/i/03/02199/gbh90xfna2zf.jpg',
+};
+
 export const MOCK_VIDEOS: Video[] = [
   {
     id: 'z2h-1',
