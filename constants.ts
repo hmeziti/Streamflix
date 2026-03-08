@@ -123,6 +123,19 @@ export const MOCK_VIDEOS: Video[] = [
     slug: 'vidmoly-session-2',
     rating: 'G',
     genre: ['Programme'],
+  },
+  {
+    id: 'z2h-10',
+    title: 'Vidmoly - Session 3',
+    description: 'Vidéo ajoutée depuis Vidmoly.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=800&q=80',
+    video_key: 'https://vidmoly.net/embed-gbh90xfna2zf.html',
+    source_type: 'vidmoly',
+    duration: 3600,
+    year: 2024,
+    slug: 'vidmoly-session-3',
+    rating: 'G',
+    genre: ['Programme'],
   }
 ];
 
@@ -131,7 +144,7 @@ export const MOCK_CATEGORIES: Category[] = [
     id: 'cat-featured',
     title: 'Programme Zero to Hero',
     slug: 'featured',
-    videos: [MOCK_VIDEOS[0], MOCK_VIDEOS[2], MOCK_VIDEOS[3], MOCK_VIDEOS[6], MOCK_VIDEOS[7], MOCK_VIDEOS[8]]
+    videos: [MOCK_VIDEOS[0], MOCK_VIDEOS[2], MOCK_VIDEOS[3], MOCK_VIDEOS[6], MOCK_VIDEOS[7], MOCK_VIDEOS[8], MOCK_VIDEOS[9]]
   },
   {
     id: 'cat-nutrition',

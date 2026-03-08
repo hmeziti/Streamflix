@@ -32,6 +32,51 @@ const saveCatalogToLocalStorage = (videos: Video[], categories: Category[]): voi
 };
 
 
+const mergeMockCatalog = (
+  currentVideos: Video[],
+  currentCategories: Category[]
+): { videos: Video[]; categories: Category[]; changed: boolean } => {
+  const videoMap = new Map(currentVideos.map((video) => [video.id, video]));
+  let changed = false;
+
+  for (const mockVideo of MOCK_VIDEOS) {
+    if (!videoMap.has(mockVideo.id)) {
+      videoMap.set(mockVideo.id, mockVideo);
+      changed = true;
+    }
+  }
+
+  const mergedVideos = Array.from(videoMap.values());
+
+  const categoryMap = new Map(currentCategories.map((category) => [category.id, category]));
+
+  for (const mockCategory of MOCK_CATEGORIES) {
+    const existingCategory = categoryMap.get(mockCategory.id);
+
+    if (!existingCategory) {
+      categoryMap.set(mockCategory.id, {
+        ...mockCategory,
+        videos: mockCategory.videos.map((video) => videoMap.get(video.id) || video)
+      });
+      changed = true;
+      continue;
+    }
+
+    const existingVideoIds = new Set(existingCategory.videos.map((video) => video.id));
+    const missingVideos = mockCategory.videos
+      .map((video) => videoMap.get(video.id) || video)
+      .filter((video) => !existingVideoIds.has(video.id));
+
+    if (missingVideos.length > 0) {
+      existingCategory.videos = [...existingCategory.videos, ...missingVideos];
+      changed = true;
+    }
+  }
+
+  return { videos: mergedVideos, categories: Array.from(categoryMap.values()), changed };
+};
+
+
 // --- Gestionnaire IndexedDB pour le mode Mock ---
 
 const openDB = (): Promise<IDBDatabase> => {
@@ -79,17 +124,28 @@ const getInitialData = async () => {
   const categories = await performTransaction<Category[]>(STORE_CATEGORIES, 'readonly', (s) => s.getAll());
 
   if (videos.length > 0 || categories.length > 0) {
-    saveCatalogToLocalStorage(videos, categories);
-    return { videos, categories };
+    const mergedCatalog = mergeMockCatalog(videos, categories);
+
+    if (mergedCatalog.changed) {
+      const db = await openDB();
+      const tx = db.transaction([STORE_VIDEOS, STORE_CATEGORIES], 'readwrite');
+      mergedCatalog.videos.forEach((video) => tx.objectStore(STORE_VIDEOS).put(video));
+      mergedCatalog.categories.forEach((category) => tx.objectStore(STORE_CATEGORIES).put(category));
+    }
+
+    saveCatalogToLocalStorage(mergedCatalog.videos, mergedCatalog.categories);
+    return { videos: mergedCatalog.videos, categories: mergedCatalog.categories };
   }
 
   const localCatalog = loadCatalogFromLocalStorage();
   if (localCatalog) {
+    const mergedCatalog = mergeMockCatalog(localCatalog.videos, localCatalog.categories);
     const db = await openDB();
     const tx = db.transaction([STORE_VIDEOS, STORE_CATEGORIES], 'readwrite');
-    localCatalog.videos.forEach(v => tx.objectStore(STORE_VIDEOS).put(v));
-    localCatalog.categories.forEach(c => tx.objectStore(STORE_CATEGORIES).put(c));
-    return localCatalog;
+    mergedCatalog.videos.forEach((video) => tx.objectStore(STORE_VIDEOS).put(video));
+    mergedCatalog.categories.forEach((category) => tx.objectStore(STORE_CATEGORIES).put(category));
+    saveCatalogToLocalStorage(mergedCatalog.videos, mergedCatalog.categories);
+    return { videos: mergedCatalog.videos, categories: mergedCatalog.categories };
   }
 
   // Premier démarrage : on peuple avec les mocks
