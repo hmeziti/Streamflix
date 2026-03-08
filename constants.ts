@@ -6,6 +6,13 @@ import thumbO8a from './o8aswxwhbgdd.jpg';
 import thumbA7k from './a7k4i9dgyp2j.jpg';
 import thumbNjq from './njq5pdzx5998.jpg';
 
+
+const NEW_CHAPTER_THUMBNAILS = {
+  chapitre1: 'https://box-1425-t10.vmeas.cloud/i/04/02199/63jfan2hhzoi.jpg',
+  chapitre2: 'https://box-1449-v10.vmeas.cloud/i/02/02199/ii92vm7emm1r.jpg',
+  chapitre3: 'https://box-1392-h10.vmeas.cloud/i/03/02199/gbh90xfna2zf.jpg',
+};
+
 export const MOCK_VIDEOS: Video[] = [
   {
     id: 'z2h-1',
@@ -102,7 +109,7 @@ export const MOCK_VIDEOS: Video[] = [
     id: 'z2h-8',
     title: 'Chapitre 1',
     description: 'Titre récupéré automatiquement depuis la page embed VidMoly.',
-    thumbnail_url: 'https://box-1425-t10.vmeas.cloud/i/04/02199/63jfan2hhzoi.jpg',
+    thumbnail_url: NEW_CHAPTER_THUMBNAILS.chapitre1,
     video_key: 'https://vidmoly.net/embed-63jfan2hhzoi.html',
     source_type: 'vidmoly',
     duration: 3600,
@@ -115,7 +122,7 @@ export const MOCK_VIDEOS: Video[] = [
     id: 'z2h-9',
     title: 'Chapitre 2',
     description: 'Titre récupéré automatiquement depuis la page embed VidMoly.',
-    thumbnail_url: 'https://box-1449-v10.vmeas.cloud/i/02/02199/ii92vm7emm1r.jpg',
+    thumbnail_url: NEW_CHAPTER_THUMBNAILS.chapitre2,
     video_key: 'https://vidmoly.net/embed-ii92vm7emm1r.html',
     source_type: 'vidmoly',
     duration: 3600,
@@ -128,25 +135,12 @@ export const MOCK_VIDEOS: Video[] = [
     id: 'z2h-10',
     title: 'Chapitre 3',
     description: 'Titre récupéré automatiquement depuis la page embed VidMoly.',
-    thumbnail_url: 'https://box-1392-h10.vmeas.cloud/i/03/02199/gbh90xfna2zf.jpg',
+    thumbnail_url: NEW_CHAPTER_THUMBNAILS.chapitre3,
     video_key: 'https://vidmoly.net/embed-gbh90xfna2zf.html',
     source_type: 'vidmoly',
     duration: 3600,
     year: 2024,
     slug: 'chapitre-3',
-    rating: 'G',
-    genre: ['Programme'],
-  },
-  {
-    id: 'z2h-10',
-    title: 'Vidmoly - Session 3',
-    description: 'Vidéo ajoutée depuis Vidmoly.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=800&q=80',
-    video_key: 'https://vidmoly.net/embed-gbh90xfna2zf.html',
-    source_type: 'vidmoly',
-    duration: 3600,
-    year: 2024,
-    slug: 'vidmoly-session-3',
     rating: 'G',
     genre: ['Programme'],
   }
