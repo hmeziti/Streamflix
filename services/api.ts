@@ -32,6 +32,100 @@ const saveCatalogToLocalStorage = (videos: Video[], categories: Category[]): voi
 };
 
 
+const DEFAULT_FALLBACK_THUMBNAIL = 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=800&q=80';
+
+const getVidmolyEmbedUrl = (videoKey: string): string => {
+  const key = videoKey.trim();
+  if (!key) return '';
+  if (key.startsWith('http')) return key;
+  const cleanId = key
+    .replace(/https?:\/\/vidmoly\.(net|to)\//, '')
+    .replace('embed-', '')
+    .replace('.html', '');
+  return `https://vidmoly.net/embed-${cleanId}.html`;
+};
+
+const extractVidmolyThumbnailFromEmbed = async (videoKey: string): Promise<string> => {
+  const embedUrl = getVidmolyEmbedUrl(videoKey);
+  if (!embedUrl) return '';
+
+  try {
+    const response = await fetch(embedUrl);
+    if (!response.ok) return '';
+    const html = await response.text();
+
+    const match = html.match(/image\s*:\s*["']([^"']+)["']/i);
+    if (!match?.[1]) return '';
+
+    const rawUrl = match[1].trim();
+    return rawUrl.startsWith('http') ? rawUrl : new URL(rawUrl, embedUrl).href;
+  } catch {
+    return '';
+  }
+};
+
+const getAutoThumbnailUrl = async (video: Partial<Video>): Promise<string> => {
+  const currentThumbnail = video.thumbnail_url?.trim();
+  if (currentThumbnail) return currentThumbnail;
+
+  if (video.source_type === 'vidmoly') {
+    const fromEmbed = await extractVidmolyThumbnailFromEmbed(video.video_key || '');
+    if (fromEmbed) return fromEmbed;
+  }
+
+  if (video.source_type === 'drive' && video.video_key?.trim()) {
+    return `https://drive.google.com/thumbnail?id=${video.video_key.trim()}&sz=w1280`;
+  }
+
+  return DEFAULT_FALLBACK_THUMBNAIL;
+};
+
+
+const mergeMockCatalog = (
+  currentVideos: Video[],
+  currentCategories: Category[]
+): { videos: Video[]; categories: Category[]; changed: boolean } => {
+  const videoMap = new Map(currentVideos.map((video) => [video.id, video]));
+  let changed = false;
+
+  for (const mockVideo of MOCK_VIDEOS) {
+    if (!videoMap.has(mockVideo.id)) {
+      videoMap.set(mockVideo.id, mockVideo);
+      changed = true;
+    }
+  }
+
+  const mergedVideos = Array.from(videoMap.values());
+
+  const categoryMap = new Map(currentCategories.map((category) => [category.id, category]));
+
+  for (const mockCategory of MOCK_CATEGORIES) {
+    const existingCategory = categoryMap.get(mockCategory.id);
+
+    if (!existingCategory) {
+      categoryMap.set(mockCategory.id, {
+        ...mockCategory,
+        videos: mockCategory.videos.map((video) => videoMap.get(video.id) || video)
+      });
+      changed = true;
+      continue;
+    }
+
+    const existingVideoIds = new Set(existingCategory.videos.map((video) => video.id));
+    const missingVideos = mockCategory.videos
+      .map((video) => videoMap.get(video.id) || video)
+      .filter((video) => !existingVideoIds.has(video.id));
+
+    if (missingVideos.length > 0) {
+      existingCategory.videos = [...existingCategory.videos, ...missingVideos];
+      changed = true;
+    }
+  }
+
+  return { videos: mergedVideos, categories: Array.from(categoryMap.values()), changed };
+};
+
+
 // --- Gestionnaire IndexedDB pour le mode Mock ---
 
 const openDB = (): Promise<IDBDatabase> => {
@@ -79,17 +173,28 @@ const getInitialData = async () => {
   const categories = await performTransaction<Category[]>(STORE_CATEGORIES, 'readonly', (s) => s.getAll());
 
   if (videos.length > 0 || categories.length > 0) {
-    saveCatalogToLocalStorage(videos, categories);
-    return { videos, categories };
+    const mergedCatalog = mergeMockCatalog(videos, categories);
+
+    if (mergedCatalog.changed) {
+      const db = await openDB();
+      const tx = db.transaction([STORE_VIDEOS, STORE_CATEGORIES], 'readwrite');
+      mergedCatalog.videos.forEach((video) => tx.objectStore(STORE_VIDEOS).put(video));
+      mergedCatalog.categories.forEach((category) => tx.objectStore(STORE_CATEGORIES).put(category));
+    }
+
+    saveCatalogToLocalStorage(mergedCatalog.videos, mergedCatalog.categories);
+    return { videos: mergedCatalog.videos, categories: mergedCatalog.categories };
   }
 
   const localCatalog = loadCatalogFromLocalStorage();
   if (localCatalog) {
+    const mergedCatalog = mergeMockCatalog(localCatalog.videos, localCatalog.categories);
     const db = await openDB();
     const tx = db.transaction([STORE_VIDEOS, STORE_CATEGORIES], 'readwrite');
-    localCatalog.videos.forEach(v => tx.objectStore(STORE_VIDEOS).put(v));
-    localCatalog.categories.forEach(c => tx.objectStore(STORE_CATEGORIES).put(c));
-    return localCatalog;
+    mergedCatalog.videos.forEach((video) => tx.objectStore(STORE_VIDEOS).put(video));
+    mergedCatalog.categories.forEach((category) => tx.objectStore(STORE_CATEGORIES).put(category));
+    saveCatalogToLocalStorage(mergedCatalog.videos, mergedCatalog.categories);
+    return { videos: mergedCatalog.videos, categories: mergedCatalog.categories };
   }
 
   // Premier démarrage : on peuple avec les mocks
@@ -133,10 +238,7 @@ export const api = {
     if (!video) return '';
 
     if (video.source_type === 'vidmoly') {
-      let key = video.video_key.trim();
-      if (key.startsWith('http')) return key;
-      const cleanId = key.replace(/https?:\/\/vidmoly\.(net|to)\//, '').replace('embed-', '').replace('.html', '');
-      return `https://vidmoly.net/embed-${cleanId}.html`;
+      return getVidmolyEmbedUrl(video.video_key);
     }
     
     if (isMockMode) {
@@ -160,7 +262,8 @@ export const api = {
   adminCreateVideo: async (video: Partial<Video>): Promise<Video> => {
     if (isMockMode) {
       const newVideo = { 
-        ...video, 
+        ...video,
+        thumbnail_url: await getAutoThumbnailUrl(video),
         id: Math.random().toString(36).substr(2, 9),
         created_at: new Date().toISOString()
       } as Video;
@@ -180,9 +283,10 @@ export const api = {
 
       return newVideo;
     }
+    const payload = { ...video, thumbnail_url: await getAutoThumbnailUrl(video) };
     const res = await fetch(`${WORKER_URL}/api/admin/videos`, {
       method: 'POST',
-      body: JSON.stringify(video),
+      body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' }
     });
     return res.json();
@@ -192,7 +296,7 @@ export const api = {
     if (isMockMode) {
       const video = await performTransaction<Video>(STORE_VIDEOS, 'readonly', (s) => s.get(id));
       if (video) {
-        const updated = { ...video, ...videoData };
+        const updated = { ...video, ...videoData, thumbnail_url: await getAutoThumbnailUrl({ ...video, ...videoData }) };
         await performTransaction(STORE_VIDEOS, 'readwrite', (s) => s.put(updated));
         
         // Mise à jour optionnelle dans les objets catégories pour la consistance immédiate
@@ -209,9 +313,10 @@ export const api = {
       }
       return;
     }
+    const payload = { ...videoData, thumbnail_url: await getAutoThumbnailUrl(videoData) };
     await fetch(`${WORKER_URL}/api/admin/videos/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(videoData),
+      body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' }
     });
   },

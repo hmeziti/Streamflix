@@ -122,11 +122,6 @@ export const Admin = () => {
       setUploadingImage(false);
     }
 
-    if (!finalThumbnailUrl) {
-      alert("Veuillez fournir une URL de miniature ou uploader une image.");
-      return;
-    }
-
     try {
       const videoData = {
         ...formData,
