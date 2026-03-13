@@ -13,6 +13,24 @@ const NEW_CHAPTER_THUMBNAILS = {
   chapitre3: 'https://box-1392-h10.vmeas.cloud/i/03/02199/gbh90xfna2zf.jpg',
 };
 
+export const LOCAL_THUMBNAILS = [
+  {
+    id: 'thumbnail-fitness',
+    label: 'Programme Fitness',
+    src: '/thumbnails/thumbnail-fitness.svg'
+  },
+  {
+    id: 'thumbnail-nutrition',
+    label: 'Focus Nutrition',
+    src: '/thumbnails/thumbnail-nutrition.svg'
+  },
+  {
+    id: 'thumbnail-wellness',
+    label: 'Bien-être',
+    src: '/thumbnails/thumbnail-wellness.svg'
+  }
+];
+
 export const MOCK_VIDEOS: Video[] = [
   {
     id: 'z2h-1',

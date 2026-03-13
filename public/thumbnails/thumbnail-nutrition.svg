@@ -1,0 +1,14 @@
+<svg width="800" height="450" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#22c55e" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" rx="24" fill="url(#bg)" />
+  <rect x="80" y="80" width="640" height="290" rx="18" fill="rgba(255,255,255,0.1)" />
+  <text x="120" y="175" fill="#ffffff" font-size="44" font-family="Arial, sans-serif" font-weight="700">Focus Nutrition</text>
+  <text x="120" y="235" fill="#e2e8f0" font-size="24" font-family="Arial, sans-serif">Miniature locale</text>
+  <circle cx="620" cy="300" r="52" fill="rgba(0,0,0,0.22)" />
+  <path d="M600 274L648 300L600 326Z" fill="#ffffff" />
+</svg>
