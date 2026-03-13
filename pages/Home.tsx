@@ -5,14 +5,20 @@ import { Navbar } from '../components/Navbar';
 import { Row } from '../components/Row';
 import { api } from '../services/api';
 import { Category, Video } from '../types';
+import { filterCategoriesBySearch } from '../utils/search';
+
+const FALLBACK_THUMBNAIL = 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=800&q=80';
+
 
 export const Home = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [featuredVideo, setFeaturedVideo] = useState<Video | null>(null);
+  const [heroImageSrc, setHeroImageSrc] = useState(FALLBACK_THUMBNAIL);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const activeSection = searchParams.get('section') || 'home';
+  const searchQuery = (searchParams.get('q') || '').trim().toLowerCase();
 
   const getVideosFromCategories = (cats: Category[]) => {
     const deduped = new Map<string, Video>();
@@ -41,16 +47,23 @@ export const Home = () => {
     }
   };
 
+  const getSearchFilteredCategories = (allCategories: Category[]) =>
+    filterCategoriesBySearch(allCategories, searchQuery);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await api.getHomeData();
-        const filteredData = getFilteredCategories(data);
+        const sectionFilteredData = getFilteredCategories(data);
+        const filteredData = getSearchFilteredCategories(sectionFilteredData);
         setCategories(filteredData);
         if (filteredData.length > 0 && filteredData[0].videos.length > 0) {
-          setFeaturedVideo(filteredData[0].videos[0]);
+          const nextFeatured = filteredData[0].videos[0];
+          setFeaturedVideo(nextFeatured);
+          setHeroImageSrc(nextFeatured.thumbnail_url || FALLBACK_THUMBNAIL);
         } else {
           setFeaturedVideo(null);
+          setHeroImageSrc(FALLBACK_THUMBNAIL);
         }
       } catch (err) {
         console.error(err);
@@ -59,7 +72,7 @@ export const Home = () => {
       }
     };
     fetchData();
-  }, [activeSection]);
+  }, [activeSection, searchQuery]);
 
   if (loading) {
     return (
@@ -74,13 +87,18 @@ export const Home = () => {
       <Navbar />
       
       {/* Hero Section */}
-      {featuredVideo && (
+      {featuredVideo && !searchQuery && (
         <div className="relative h-[56.25vw] md:h-[85vh] w-full">
            <div className="absolute top-0 left-0 w-full h-full">
              <img 
-                src={featuredVideo.thumbnail_url} 
+                src={heroImageSrc} 
                 alt={featuredVideo.title}
                 className="w-full h-full object-cover"
+                onError={() => {
+                  if (heroImageSrc !== FALLBACK_THUMBNAIL) {
+                    setHeroImageSrc(FALLBACK_THUMBNAIL);
+                  }
+                }}
              />
              <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-transparent to-transparent"></div>
              <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent"></div>
@@ -112,9 +130,24 @@ export const Home = () => {
       )}
 
       <div className="mt-6 md:mt-12 relative z-10 pl-4 md:pl-0 space-y-8">
-        {categories.map((cat) => (
-          <Row key={cat.id} title={cat.title} videos={cat.videos} isLarge={cat.slug === 'trending'} />
-        ))}
+        {searchQuery && (
+          <div className="px-4 md:px-12 pt-6">
+            <p className="text-gray-300 text-sm md:text-base">
+              Résultats pour <span className="text-white font-semibold">"{searchParams.get('q')}"</span>
+            </p>
+          </div>
+        )}
+
+        {categories.length > 0 ? (
+          categories.map((cat) => (
+            <Row key={cat.id} title={cat.title} videos={cat.videos} isLarge={cat.slug === 'trending'} />
+          ))
+        ) : (
+          <div className="px-4 md:px-12 py-16 text-center">
+            <h2 className="text-white text-2xl font-bold mb-3">Aucun résultat</h2>
+            <p className="text-gray-400">Essaie une autre recherche ou retourne à l'accueil.</p>
+          </div>
+        )}
       </div>
     </div>
   );

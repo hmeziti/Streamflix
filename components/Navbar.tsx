@@ -18,6 +18,8 @@ export const Navbar = () => {
     { label: 'My List', section: 'my-list' },
   ];
 
+  const getSectionLink = (section: string) => (section === 'home' ? '/' : `/?section=${section}`);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
@@ -28,9 +30,17 @@ export const Navbar = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    const query = searchQuery.trim();
+
+    if (!query) {
+      navigate(getSectionLink(activeSection));
+      return;
     }
+
+    const params = new URLSearchParams();
+    if (activeSection !== 'home') params.set('section', activeSection);
+    params.set('q', query);
+    navigate(`/?${params.toString()}`);
   };
 
   const handleLogout = async () => {
@@ -50,7 +60,7 @@ export const Navbar = () => {
           <ul className="hidden md:flex space-x-4 text-sm font-medium text-gray-200">
             {menuItems.map((item) => {
               const isActive = activeSection === item.section;
-              const link = item.section === 'home' ? '/' : `/?section=${item.section}`;
+              const link = getSectionLink(item.section);
 
               return (
                 <li key={item.section} className="cursor-pointer">
@@ -64,6 +74,22 @@ export const Navbar = () => {
               );
             })}
           </ul>
+
+          <div className="md:hidden">
+            <label htmlFor="mobile-section" className="sr-only">Choisir une section</label>
+            <select
+              id="mobile-section"
+              value={activeSection}
+              onChange={(e) => navigate(getSectionLink(e.target.value))}
+              className="bg-black/50 text-white border border-gray-700 rounded px-2 py-1 text-sm"
+            >
+              {menuItems.map((item) => (
+                <option key={item.section} value={item.section}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="flex items-center space-x-4 md:space-x-6">
