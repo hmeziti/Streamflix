@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { VideoCard } from './VideoCard';
 import { Video } from '../types';
@@ -9,10 +9,10 @@ interface RowProps {
   isLarge?: boolean;
 }
 
-export const Row: React.FC<RowProps> = ({ title, videos, isLarge = false }) => {
+const RowComponent: React.FC<RowProps> = ({ title, videos, isLarge = false }) => {
   const rowRef = useRef<HTMLDivElement>(null);
 
-  const handleClick = (direction: 'left' | 'right') => {
+  const handleClick = useCallback((direction: 'left' | 'right') => {
     if (rowRef.current) {
       const { scrollLeft, clientWidth } = rowRef.current;
       const scrollTo = direction === 'left' 
@@ -21,7 +21,7 @@ export const Row: React.FC<RowProps> = ({ title, videos, isLarge = false }) => {
       
       rowRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
     }
-  };
+  }, []);
 
   return (
     <div className="space-y-2 mb-8 group px-4 md:px-12">
@@ -55,3 +55,5 @@ export const Row: React.FC<RowProps> = ({ title, videos, isLarge = false }) => {
     </div>
   );
 };
+
+export const Row = React.memo(RowComponent);
