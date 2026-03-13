@@ -30,9 +30,17 @@ export const Navbar = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    const query = searchQuery.trim();
+
+    if (!query) {
+      navigate(getSectionLink(activeSection));
+      return;
     }
+
+    const params = new URLSearchParams();
+    if (activeSection !== 'home') params.set('section', activeSection);
+    params.set('q', query);
+    navigate(`/?${params.toString()}`);
   };
 
   const handleLogout = async () => {

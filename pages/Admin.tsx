@@ -17,6 +17,7 @@ export const Admin = () => {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const fallbackThumbnail = 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=800&q=80';
   
   const [formData, setFormData] = useState<Partial<Video>>({
     title: '',
@@ -130,8 +131,8 @@ export const Admin = () => {
 
       if (editingId) {
         // Mode Édition
-        await api.adminUpdateVideo(editingId, videoData);
-        setVideos(videos.map(v => v.id === editingId ? { ...v, ...videoData } as Video : v));
+        const updatedVideo = await api.adminUpdateVideo(editingId, videoData);
+        setVideos(videos.map(v => v.id === editingId ? (updatedVideo || { ...v, ...videoData } as Video) : v));
         alert('Vidéo modifiée avec succès !');
       } else {
         // Mode Création
@@ -196,7 +197,7 @@ export const Admin = () => {
                          {videos.map(video => (
                              <tr key={video.id} className="hover:bg-[#3f3f3f]">
                                  <td className="p-4 w-24">
-                                     <img src={video.thumbnail_url} alt="" className="w-16 h-10 object-cover rounded" />
+                                     <img src={video.thumbnail_url || fallbackThumbnail} alt="" className="w-16 h-10 object-cover rounded" onError={(e) => { e.currentTarget.src = fallbackThumbnail; }} />
                                  </td>
                                  <td className="p-4">
                                      {video.source_type === 'vidmoly' ? (

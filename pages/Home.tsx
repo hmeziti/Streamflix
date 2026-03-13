@@ -5,10 +5,15 @@ import { Navbar } from '../components/Navbar';
 import { Row } from '../components/Row';
 import { api } from '../services/api';
 import { Category, Video } from '../types';
+import { filterCategoriesBySearch } from '../utils/search';
+
+const FALLBACK_THUMBNAIL = 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=800&q=80';
+
 
 export const Home = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [featuredVideo, setFeaturedVideo] = useState<Video | null>(null);
+  const [heroImageSrc, setHeroImageSrc] = useState(FALLBACK_THUMBNAIL);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -42,20 +47,8 @@ export const Home = () => {
     }
   };
 
-  const getSearchFilteredCategories = (allCategories: Category[]) => {
-    if (!searchQuery) return allCategories;
-
-    return allCategories
-      .map((category) => ({
-        ...category,
-        videos: category.videos.filter((video) => {
-          const genreText = (video.genre || []).join(' ').toLowerCase();
-          const searchableText = `${video.title} ${video.description} ${genreText}`.toLowerCase();
-          return searchableText.includes(searchQuery);
-        }),
-      }))
-      .filter((category) => category.videos.length > 0);
-  };
+  const getSearchFilteredCategories = (allCategories: Category[]) =>
+    filterCategoriesBySearch(allCategories, searchQuery);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,9 +58,12 @@ export const Home = () => {
         const filteredData = getSearchFilteredCategories(sectionFilteredData);
         setCategories(filteredData);
         if (filteredData.length > 0 && filteredData[0].videos.length > 0) {
-          setFeaturedVideo(filteredData[0].videos[0]);
+          const nextFeatured = filteredData[0].videos[0];
+          setFeaturedVideo(nextFeatured);
+          setHeroImageSrc(nextFeatured.thumbnail_url || FALLBACK_THUMBNAIL);
         } else {
           setFeaturedVideo(null);
+          setHeroImageSrc(FALLBACK_THUMBNAIL);
         }
       } catch (err) {
         console.error(err);
@@ -95,9 +91,14 @@ export const Home = () => {
         <div className="relative h-[56.25vw] md:h-[85vh] w-full">
            <div className="absolute top-0 left-0 w-full h-full">
              <img 
-                src={featuredVideo.thumbnail_url} 
+                src={heroImageSrc} 
                 alt={featuredVideo.title}
                 className="w-full h-full object-cover"
+                onError={() => {
+                  if (heroImageSrc !== FALLBACK_THUMBNAIL) {
+                    setHeroImageSrc(FALLBACK_THUMBNAIL);
+                  }
+                }}
              />
              <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-transparent to-transparent"></div>
              <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent"></div>

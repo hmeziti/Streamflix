@@ -292,7 +292,7 @@ export const api = {
     return res.json();
   },
 
-  adminUpdateVideo: async (id: string, videoData: Partial<Video>): Promise<void> => {
+  adminUpdateVideo: async (id: string, videoData: Partial<Video>): Promise<Video | null> => {
     if (isMockMode) {
       const video = await performTransaction<Video>(STORE_VIDEOS, 'readonly', (s) => s.get(id));
       if (video) {
@@ -310,15 +310,24 @@ export const api = {
         }
         const latestVideos = await performTransaction<Video[]>(STORE_VIDEOS, 'readonly', (s) => s.getAll());
         saveCatalogToLocalStorage(latestVideos, categories);
+        return updated;
       }
-      return;
+      return null;
     }
     const payload = { ...videoData, thumbnail_url: await getAutoThumbnailUrl(videoData) };
-    await fetch(`${WORKER_URL}/api/admin/videos/${id}`, {
+    const res = await fetch(`${WORKER_URL}/api/admin/videos/${id}`, {
       method: 'PUT',
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' }
     });
+
+    if (!res.ok) return null;
+
+    try {
+      return await res.json();
+    } catch {
+      return payload as Video;
+    }
   },
 
   adminDeleteVideo: async (id: string): Promise<void> => {
