@@ -1,20 +1,37 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# StreamFLIX
 
-# Run and deploy your AI Studio app
+Interface de catalogue et de lecture vidéo construite avec React, TypeScript et Vite. Sans configuration Supabase, l'application démarre en mode démonstration et conserve le catalogue dans IndexedDB.
 
-This contains everything you need to run your app locally.
+## Démarrage local
 
-View your app in AI Studio: https://ai.studio/apps/drive/1AzFIama8jpG0DMriClx07EGpxLjbZZPY
+**Prérequis :** Node.js 20 ou une version ultérieure.
 
-## Run Locally
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
 
-**Prerequisites:**  Node.js
+L'application est alors disponible sur <http://localhost:3000>.
 
+## Configuration
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Les variables accessibles au navigateur doivent porter le préfixe `VITE_` :
+
+- `VITE_SUPABASE_URL` : URL du projet Supabase ;
+- `VITE_SUPABASE_ANON_KEY` : clé publique anonyme Supabase ;
+- `VITE_WORKER_URL` : URL du Worker qui expose l'API vidéo.
+
+Ne placez jamais une clé Supabase `service_role` dans une variable `VITE_` : ces variables sont intégrées au bundle client. Les secrets du Worker se configurent avec Wrangler.
+
+## Vérifications
+
+```bash
+npm test
+npx tsc --noEmit
+npm run build
+```
+
+## Worker Cloudflare
+
+Le proxy vidéo se trouve dans `backend/worker.ts`. Configurez les secrets `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` dans l'environnement Cloudflare avant son déploiement.

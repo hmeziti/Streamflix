@@ -30,8 +30,8 @@ export const Login = () => {
         if (error) throw error;
       }
       navigate('/');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur inattendue est survenue.');
     }
   };
 
