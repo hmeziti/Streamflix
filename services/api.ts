@@ -3,13 +3,21 @@ import { MOCK_CATEGORIES, MOCK_VIDEOS } from '../constants';
 import { Category, Video } from '../types';
 import { isMockMode } from './supabase';
 
-const WORKER_URL = 'https://ton-worker.workers.dev'; 
+const WORKER_URL = (import.meta.env.VITE_WORKER_URL ?? 'https://ton-worker.workers.dev').replace(/\/$/, '');
 const DB_NAME = 'StreamFlixDB';
 const DB_VERSION = 1;
 const STORE_VIDEOS = 'videos';
 const STORE_CATEGORIES = 'categories';
 
 const LOCAL_STORAGE_KEY = 'streamflix-mock-catalog';
+
+const fetchJson = async <T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> => {
+  const response = await fetch(input, init);
+  if (!response.ok) {
+    throw new Error(`La requête a échoué (${response.status} ${response.statusText})`);
+  }
+  return response.json() as Promise<T>;
+};
 
 const loadCatalogFromLocalStorage = (): { videos: Video[]; categories: Category[] } | null => {
   try {
@@ -220,8 +228,7 @@ export const api = {
         videos: cat.videos.map((v: Video) => videos.find((rv: Video) => rv.id === v.id) || v)
       }));
     }
-    const res = await fetch(`${WORKER_URL}/api/videos/home`);
-    return res.json();
+    return fetchJson<Category[]>(`${WORKER_URL}/api/videos/home`);
   },
 
   getVideoDetails: async (slug: string): Promise<Video | null> => {
@@ -229,12 +236,13 @@ export const api = {
       const { videos } = await getInitialData();
       return videos.find((v: Video) => v.slug === slug) || null;
     }
-    const res = await fetch(`${WORKER_URL}/api/videos/${slug}`);
-    return res.json();
+    return fetchJson<Video>(`${WORKER_URL}/api/videos/${encodeURIComponent(slug)}`);
   },
 
-  getPlaybackUrl: async (slug: string): Promise<string> => {
-    const video = await api.getVideoDetails(slug);
+  getPlaybackUrl: async (videoOrSlug: Video | string): Promise<string> => {
+    const video = typeof videoOrSlug === 'string'
+      ? await api.getVideoDetails(videoOrSlug)
+      : videoOrSlug;
     if (!video) return '';
 
     if (video.source_type === 'vidmoly') {
@@ -247,7 +255,7 @@ export const api = {
        }
        return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
     }
-    return `${WORKER_URL}/api/play/${slug}`;
+    return `${WORKER_URL}/api/play/${encodeURIComponent(video.slug)}`;
   },
 
   adminGetVideos: async (): Promise<Video[]> => {
@@ -255,8 +263,7 @@ export const api = {
       const { videos } = await getInitialData();
       return videos;
     }
-    const res = await fetch(`${WORKER_URL}/api/admin/videos`);
-    return res.json();
+    return fetchJson<Video[]>(`${WORKER_URL}/api/admin/videos`);
   },
 
   adminCreateVideo: async (video: Partial<Video>): Promise<Video> => {
@@ -264,7 +271,7 @@ export const api = {
       const newVideo = { 
         ...video,
         thumbnail_url: await getAutoThumbnailUrl(video),
-        id: Math.random().toString(36).substr(2, 9),
+        id: crypto.randomUUID(),
         created_at: new Date().toISOString()
       } as Video;
       
@@ -284,12 +291,11 @@ export const api = {
       return newVideo;
     }
     const payload = { ...video, thumbnail_url: await getAutoThumbnailUrl(video) };
-    const res = await fetch(`${WORKER_URL}/api/admin/videos`, {
+    return fetchJson<Video>(`${WORKER_URL}/api/admin/videos`, {
       method: 'POST',
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' }
     });
-    return res.json();
   },
 
   adminUpdateVideo: async (id: string, videoData: Partial<Video>): Promise<Video | null> => {
@@ -315,7 +321,7 @@ export const api = {
       return null;
     }
     const payload = { ...videoData, thumbnail_url: await getAutoThumbnailUrl(videoData) };
-    const res = await fetch(`${WORKER_URL}/api/admin/videos/${id}`, {
+    const res = await fetch(`${WORKER_URL}/api/admin/videos/${encodeURIComponent(id)}`, {
       method: 'PUT',
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' }
@@ -343,7 +349,10 @@ export const api = {
       saveCatalogToLocalStorage(latestVideos, latestCategories);
       return;
     }
-    await fetch(`${WORKER_URL}/api/admin/videos/${id}`, { method: 'DELETE' });
+    const response = await fetch(`${WORKER_URL}/api/admin/videos/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!response.ok) {
+      throw new Error(`La suppression a échoué (${response.status} ${response.statusText})`);
+    }
   },
 
   uploadThumbnail: async (file: File): Promise<string> => {

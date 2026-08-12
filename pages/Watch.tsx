@@ -17,9 +17,17 @@ export const Watch = () => {
       if (!slug) return;
       try {
         const videoData = await api.getVideoDetails(slug);
+        if (!videoData) {
+          setError('Cette vidéo est introuvable.');
+          return;
+        }
         setVideo(videoData);
-        
-        const playbackUrl = await api.getPlaybackUrl(slug);
+
+        const playbackUrl = await api.getPlaybackUrl(videoData);
+        if (!playbackUrl) {
+          setError('Aucune source de lecture disponible.');
+          return;
+        }
         setUrl(playbackUrl);
       } catch (err) {
         setError('Impossible de charger la vidéo.');

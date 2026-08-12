@@ -1,22 +1,42 @@
 
-import React from 'react';
-import { MemoryRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { Watch } from './pages/Watch';
 import { Login } from './pages/Login';
 import { Admin } from './pages/Admin';
+import { isMockMode, supabase } from './services/supabase';
 
-// Protected Route Component (Simplified for Demo)
-// Fix: Use React.FC with explicit children definition to resolve "missing children" property errors when using nested JSX elements.
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // In a real app, use Supabase session context here
-  const isAuthenticated = true; 
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(isMockMode ? true : null);
+
+  useEffect(() => {
+    if (!supabase) return;
+
+    let active = true;
+    void supabase.auth.getSession().then(({ data }) => {
+      if (active) setIsAuthenticated(Boolean(data.session));
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(Boolean(session));
+    });
+
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (isAuthenticated === null) {
+    return <div className="min-h-screen bg-background" aria-label="Vérification de la session" />;
+  }
+
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 const App = () => {
   return (
-    <MemoryRouter>
+    <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/watch/:slug" element={
@@ -35,7 +55,7 @@ const App = () => {
           <ProtectedRoute><Home /></ProtectedRoute>
         } />
       </Routes>
-    </MemoryRouter>
+    </BrowserRouter>
   );
 };
 
