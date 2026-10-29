@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, ArrowLeft, Save, HardDrive, Share2, PlayCircle, Upload, X, Pencil, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
 import { Video } from '../types';
+import { FALLBACK_THUMBNAIL } from '../utils/media';
+import { slugify } from '../utils/slug';
 
 export const Admin = () => {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -17,7 +19,6 @@ export const Admin = () => {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const fallbackThumbnail = 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=800&q=80';
   
   const [formData, setFormData] = useState<Partial<Video>>({
     title: '',
@@ -197,7 +198,7 @@ export const Admin = () => {
                          {videos.map(video => (
                              <tr key={video.id} className="hover:bg-[#3f3f3f]">
                                  <td className="p-4 w-24">
-                                     <img src={video.thumbnail_url || fallbackThumbnail} alt="" className="w-16 h-10 object-cover rounded" onError={(e) => { e.currentTarget.src = fallbackThumbnail; }} />
+                                     <img src={video.thumbnail_url || FALLBACK_THUMBNAIL} alt="" className="w-16 h-10 object-cover rounded" onError={(e) => { e.currentTarget.src = FALLBACK_THUMBNAIL; }} />
                                  </td>
                                  <td className="p-4">
                                      {video.source_type === 'vidmoly' ? (
@@ -338,7 +339,7 @@ export const Admin = () => {
 
                       <div>
                           <label className="block text-sm text-gray-400 mb-1">Titre</label>
-                          <input required className="w-full bg-[#2f2f2f] rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})} />
+                          <input required className="w-full bg-[#2f2f2f] rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value, slug: slugify(e.target.value)})} />
                       </div>
                       
                       <div>

@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, Info, Plus, ImageOff } from 'lucide-react';
 import { Video } from '../types';
+import { FALLBACK_THUMBNAIL } from '../utils/media';
 
 interface VideoCardProps {
   video: Video;
   isLarge?: boolean;
 }
-
-const FALLBACK_THUMBNAIL = 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=800&q=80';
 
 export const VideoCard: React.FC<VideoCardProps> = ({ video, isLarge = false }) => {
   const navigate = useNavigate();

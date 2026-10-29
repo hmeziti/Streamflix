@@ -8,11 +8,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "worker:dev": "cd backend && npx wrangler dev",
+    "worker:deploy": "cd backend && npx wrangler deploy",
     "scrape:vidmoly": "node scripts/scrape_vidmoly.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.94.0",
-    "aws4fetch": "^1.0.20",
     "lucide-react": "^0.563.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

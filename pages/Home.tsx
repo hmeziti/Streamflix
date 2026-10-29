@@ -5,9 +5,8 @@ import { Navbar } from '../components/Navbar';
 import { Row } from '../components/Row';
 import { api } from '../services/api';
 import { Category, Video } from '../types';
+import { FALLBACK_THUMBNAIL } from '../utils/media';
 import { filterCategoriesBySearch } from '../utils/search';
-
-const FALLBACK_THUMBNAIL = 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=800&q=80';
 
 
 export const Home = () => {

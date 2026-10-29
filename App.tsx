@@ -1,17 +1,28 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MemoryRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { Watch } from './pages/Watch';
 import { Login } from './pages/Login';
 import { Admin } from './pages/Admin';
+import { isMockMode, supabase } from './services/supabase';
 
-// Protected Route Component (Simplified for Demo)
-// Fix: Use React.FC with explicit children definition to resolve "missing children" property errors when using nested JSX elements.
+// En mode démo tout est accessible ; sinon on exige une session Supabase.
+// Les droits admin sont vérifiés côté Worker (profiles.is_admin), pas ici.
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // In a real app, use Supabase session context here
-  const isAuthenticated = true; 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  const [status, setStatus] = useState<'loading' | 'signed-in' | 'signed-out'>(isMockMode ? 'signed-in' : 'loading');
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => setStatus(data.session ? 'signed-in' : 'signed-out'));
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      setStatus(session ? 'signed-in' : 'signed-out');
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  if (status === 'loading') return null;
+  return status === 'signed-in' ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 const App = () => {
