@@ -1,125 +1,106 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Bell, User, LogOut } from 'lucide-react';
-import { isMockMode, supabase } from '../services/supabase';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Search } from 'lucide-react';
+import { getSectionLink, isSectionId, SECTIONS } from '../utils/sections';
+import { ProfileMenu } from './ProfileMenu';
+
+// Hauteur de l'en-tête fixe : ligne principale (56 / 84 px) + puces de sections sous xl (48 px)
+export const HEADER_OFFSET_CLASS = 'pt-[104px] md:pt-[132px] xl:pt-[84px]';
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const navigate = useNavigate();
   const location = useLocation();
 
-  const activeSection = new URLSearchParams(location.search).get('section') || 'home';
-  const menuItems = [
-    { label: 'Home', section: 'home' },
-    { label: 'Series', section: 'series' },
-    { label: 'Films', section: 'films' },
-    { label: 'New & Popular', section: 'popular' },
-    { label: 'My List', section: 'my-list' },
-  ];
-
-  const getSectionLink = (section: string) => (section === 'home' ? '/' : `/?section=${section}`);
+  const sectionParam = searchParams.get('section');
+  const activeSection = location.pathname === '/' ? (isSectionId(sectionParam) ? sectionParam : 'home') : null;
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0);
-    };
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 8);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Le champ suit l'URL (retour arrière, clic sur le logo...)
+  useEffect(() => {
+    setSearchQuery(searchParams.get('q') || '');
+  }, [searchParams]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const query = searchQuery.trim();
-
-    if (!query) {
-      navigate(getSectionLink(activeSection));
-      return;
-    }
-
-    const params = new URLSearchParams();
-    if (activeSection !== 'home') params.set('section', activeSection);
-    params.set('q', query);
-    navigate(`/?${params.toString()}`);
-  };
-
-  const handleLogout = async () => {
-    if (!isMockMode && supabase) {
-      await supabase.auth.signOut();
-    }
-    navigate('/login');
+    navigate(query ? `/search?q=${encodeURIComponent(query)}` : '/');
   };
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-colors duration-300 ${isScrolled ? 'bg-[#141414]' : 'bg-gradient-to-b from-black/70 to-transparent'}`}>
-      <div className="px-4 md:px-12 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-8">
-          <Link to="/" className="text-primary text-2xl md:text-3xl font-bold tracking-tighter cursor-pointer">
+    <header
+      className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${
+        isScrolled ? 'border-b border-white/5 bg-background/95 backdrop-blur' : 'bg-linear-to-b from-background/80 to-transparent'
+      }`}
+    >
+      <div className="flex h-14 items-center justify-between gap-4 px-4 md:h-[84px] md:px-14">
+        <div className="flex items-center gap-9">
+          <Link to="/" className="font-display text-[22px] font-extrabold tracking-[-0.02em] text-primary md:text-[26px]">
             STREAMFLIX
           </Link>
-          <ul className="hidden md:flex space-x-4 text-sm font-medium text-gray-200">
-            {menuItems.map((item) => {
-              const isActive = activeSection === item.section;
-              const link = getSectionLink(item.section);
-
-              return (
-                <li key={item.section} className="cursor-pointer">
-                  <Link
-                    to={link}
-                    className={`transition ${isActive ? 'text-white font-semibold' : 'hover:text-gray-400'}`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-
-          <div className="md:hidden">
-            <label htmlFor="mobile-section" className="sr-only">Choisir une section</label>
-            <select
-              id="mobile-section"
-              value={activeSection}
-              onChange={(e) => navigate(getSectionLink(e.target.value))}
-              className="bg-black/50 text-white border border-gray-700 rounded px-2 py-1 text-sm"
-            >
-              {menuItems.map((item) => (
-                <option key={item.section} value={item.section}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <nav aria-label="Navigation principale" className="hidden xl:block">
+            <ul className="flex gap-6 text-sm font-medium">
+              {SECTIONS.map((section) => {
+                const isActive = activeSection === section.id;
+                return (
+                  <li key={section.id}>
+                    <Link
+                      to={getSectionLink(section.id)}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`whitespace-nowrap transition ${isActive ? 'font-semibold text-foreground' : 'text-muted hover:text-foreground'}`}
+                    >
+                      {section.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
         </div>
 
-        <div className="flex items-center space-x-4 md:space-x-6">
-          <form onSubmit={handleSearch} className="relative hidden sm:block">
-             <Search className="absolute left-2 top-1.5 w-4 h-4 text-gray-400" />
-             <input 
-                type="text" 
-                placeholder="Titles, people, genres" 
-                className="bg-black/40 border border-gray-600 focus:border-white transition pl-8 pr-2 py-1 text-sm text-white w-64 outline-none"
+        <div className="hidden items-center gap-3 md:flex">
+          <form role="search" onSubmit={handleSearch}>
+            <label className="flex h-11 w-[280px] items-center gap-2 rounded-full border border-line bg-surface px-4 text-muted transition focus-within:border-zinc-500">
+              <Search className="h-[18px] w-[18px] flex-none" aria-hidden="true" />
+              <span className="sr-only">Rechercher</span>
+              <input
+                type="search"
+                placeholder="Titres, thèmes, chapitres"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-             />
+                className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-hidden placeholder:text-muted"
+              />
+            </label>
           </form>
-          <Bell className="w-5 h-5 text-gray-200 cursor-pointer hover:text-white" />
-          <div className="group relative">
-            <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center cursor-pointer">
-               <User className="w-5 h-5 text-white" />
-            </div>
-            {/* Dropdown */}
-            <div className="absolute right-0 top-8 w-48 bg-black/90 border border-gray-700 rounded shadow-lg hidden group-hover:block pt-2">
-               <div className="flex flex-col text-sm text-gray-300">
-                  <Link to="/admin" className="px-4 py-2 hover:bg-gray-800 hover:text-white">Admin Dashboard</Link>
-                  <button onClick={handleLogout} className="px-4 py-2 hover:bg-gray-800 hover:text-white text-left flex items-center gap-2">
-                    <LogOut className="w-4 h-4" /> Sign out
-                  </button>
-               </div>
-            </div>
-          </div>
+          <ProfileMenu />
         </div>
       </div>
-    </nav>
+
+      <nav aria-label="Sections" className="no-scrollbar flex h-12 items-center gap-2 overflow-x-auto px-4 md:px-14 xl:hidden">
+        {SECTIONS.map((section) => {
+          const isActive = activeSection === section.id;
+          return (
+            <Link
+              key={section.id}
+              to={getSectionLink(section.id)}
+              aria-current={isActive ? 'page' : undefined}
+              className={`inline-flex h-9 flex-none items-center rounded-full px-4 text-sm transition ${
+                isActive ? 'bg-foreground font-semibold text-background' : 'border border-line font-medium text-foreground hover:border-zinc-500'
+              }`}
+            >
+              {section.label}
+            </Link>
+          );
+        })}
+      </nav>
+    </header>
   );
 };

@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, isMockMode } from '../services/supabase';
+import loginBackdrop from '../4pvdbj19xv02.jpg';
+
+const inputClass =
+  'h-12 w-full rounded-[10px] border border-line bg-surface-2 px-4 text-foreground outline-hidden transition placeholder:text-subtle focus:border-zinc-400';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -36,46 +40,47 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center flex items-center justify-center relative" style={{ backgroundImage: 'url(https://assets.nflxext.com/ffe/siteui/vlv3/f841d4c7-10e1-40af-bcae-07a3f8dc141a/f6d7434e-d6de-4185-a6d4-c77a2d08737b/US-en-20220502-popsignuptwoweeks-perspective_alpha_website_medium.jpg)' }}>
-      <div className="absolute inset-0 bg-black/60"></div>
-      
-      <div className="relative z-10 w-full max-w-md bg-black/75 p-16 rounded-md shadow-2xl">
-         <h1 className="text-3xl font-bold mb-8">{isLogin ? 'Sign In' : 'Sign Up'}</h1>
-         
-         {isMockMode && (
-           <div className="mb-4 bg-yellow-900/50 p-2 text-xs text-yellow-200 border border-yellow-700 rounded">
-             Demo Mode: No backend connected. Click Sign In to enter.
-           </div>
-         )}
+    <div className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-background px-4 py-10">
+      <img src={loginBackdrop} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-125 object-cover blur-[48px] brightness-[0.35] saturate-[0.6]" />
 
-         {error && <div className="bg-orange-600 text-white text-sm p-3 rounded mb-4">{error}</div>}
+      <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-background/80 p-8 shadow-2xl backdrop-blur md:p-12">
+        <p className="mb-8 font-display text-2xl font-extrabold tracking-[-0.02em] text-primary">STREAMFLIX</p>
+        <h1 className="mb-6 font-display text-3xl font-extrabold tracking-[-0.02em]">{isLogin ? 'Se connecter' : 'Créer un compte'}</h1>
 
-         <form onSubmit={handleAuth} className="space-y-4">
-           <input 
-              type="email" 
-              placeholder="Email or phone number" 
-              className="w-full bg-[#333] rounded px-4 py-3 outline-none focus:bg-[#454545] text-white placeholder-gray-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-           />
-           <input 
-              type="password" 
-              placeholder="Password" 
-              className="w-full bg-[#333] rounded px-4 py-3 outline-none focus:bg-[#454545] text-white placeholder-gray-500"
+        {isMockMode && (
+          <div className="mb-4 rounded-[10px] border border-amber-700/60 bg-amber-950/50 p-3 text-xs text-amber-200">
+            Mode démo : aucun backend connecté. Valide le formulaire pour entrer.
+          </div>
+        )}
+
+        {error && <div role="alert" className="mb-4 rounded-[10px] bg-primary/15 p-3 text-sm text-primary-text">{error}</div>}
+
+        <form onSubmit={handleAuth} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-1.5 text-sm text-muted">
+            Email
+            <input type="email" autoComplete="email" className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm text-muted">
+            Mot de passe
+            <input
+              type="password"
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
+              className={inputClass}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-           />
-           <button type="submit" className="w-full bg-primary hover:bg-red-700 transition font-bold py-3 rounded mt-6">
-              {isLogin ? 'Sign In' : 'Sign Up'}
-           </button>
-         </form>
+            />
+          </label>
+          <button type="submit" className="mt-4 h-12 rounded-[10px] bg-primary font-semibold text-white transition hover:bg-primary-hover">
+            {isLogin ? 'Se connecter' : 'Créer mon compte'}
+          </button>
+        </form>
 
-         <div className="mt-6 text-gray-400 text-sm">
-            {isLogin ? 'New to StreamFLIX? ' : 'Already have an account? '}
-            <button onClick={() => setIsLogin(!isLogin)} className="text-white hover:underline">
-              {isLogin ? 'Sign up now.' : 'Sign in.'}
-            </button>
-         </div>
+        <p className="mt-6 text-sm text-muted">
+          {isLogin ? 'Nouveau sur StreamFLIX ? ' : 'Déjà un compte ? '}
+          <button type="button" onClick={() => setIsLogin(!isLogin)} className="font-medium text-foreground hover:underline">
+            {isLogin ? 'Créer un compte' : 'Se connecter'}
+          </button>
+        </p>
       </div>
     </div>
   );

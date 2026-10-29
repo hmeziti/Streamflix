@@ -1,153 +1,205 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Play, Info } from 'lucide-react';
-import { Navbar } from '../components/Navbar';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Search } from 'lucide-react';
+import { Hero } from '../components/Hero';
+import { MobileTabBar } from '../components/MobileTabBar';
+import { HEADER_OFFSET_CLASS, Navbar } from '../components/Navbar';
 import { Row } from '../components/Row';
+import { VideoCard } from '../components/VideoCard';
 import { api } from '../services/api';
+import { useContinueWatching, useMyList } from '../services/library';
 import { Category, Video } from '../types';
-import { FALLBACK_THUMBNAIL } from '../utils/media';
-import { filterCategoriesBySearch } from '../utils/search';
+import { formatDuration, formatRemaining } from '../utils/format';
+import { searchVideos } from '../utils/search';
+import { getSectionVideos, getUniqueVideos, isSectionId, SECTIONS } from '../utils/sections';
 
+const HERO_VIDEO_COUNT = 4;
+
+const VideoGrid: React.FC<{ videos: Video[]; numbered?: boolean }> = ({ videos, numbered = false }) => (
+  <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-x-5 gap-y-8">
+    {videos.map((video, index) => (
+      <VideoCard key={video.id} video={video} number={numbered ? index + 1 : undefined} className="w-full" />
+    ))}
+  </div>
+);
+
+const EmptyState: React.FC<{ title: string; text: string }> = ({ title, text }) => (
+  <div className="flex flex-col items-center gap-3 rounded-2xl border border-line bg-surface px-6 py-16 text-center">
+    <h2 className="font-display text-2xl font-bold">{title}</h2>
+    <p className="max-w-md text-muted">{text}</p>
+  </div>
+);
 
 export const Home = () => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [featuredVideo, setFeaturedVideo] = useState<Video | null>(null);
-  const [heroImageSrc, setHeroImageSrc] = useState(FALLBACK_THUMBNAIL);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
+  const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
-  const activeSection = searchParams.get('section') || 'home';
-  const searchQuery = (searchParams.get('q') || '').trim().toLowerCase();
+  const myList = useMyList();
+  const history = useContinueWatching();
 
-  const getVideosFromCategories = (cats: Category[]) => {
-    const deduped = new Map<string, Video>();
-    cats.forEach((cat) => cat.videos.forEach((video) => deduped.set(video.id, video)));
-    return Array.from(deduped.values());
-  };
+  const isSearchPage = location.pathname === '/search';
+  const query = (searchParams.get('q') || '').trim();
+  const sectionParam = searchParams.get('section');
+  const section = isSectionId(sectionParam) ? sectionParam : 'home';
+  const isBrowsing = !isSearchPage && !query && section === 'home';
 
-  const getFilteredCategories = (allCategories: Category[]) => {
-    switch (activeSection) {
-      case 'series':
-        return allCategories.filter((cat) => ['training', 'health'].includes(cat.slug));
-      case 'films':
-        return allCategories.filter((cat) => ['featured', 'nutrition'].includes(cat.slug));
-      case 'popular': {
-        const popularVideos = getVideosFromCategories(allCategories)
-          .sort((a, b) => b.year - a.year)
-          .slice(0, 8);
-        return [{ id: 'popular', title: 'New & Popular', slug: 'popular', videos: popularVideos }];
-      }
-      case 'my-list': {
-        const myListVideos = getVideosFromCategories(allCategories).slice(0, 6);
-        return [{ id: 'my-list', title: 'My List', slug: 'my-list', videos: myListVideos }];
-      }
-      default:
-        return allCategories;
-    }
-  };
-
-  const getSearchFilteredCategories = (allCategories: Category[]) =>
-    filterCategoriesBySearch(allCategories, searchQuery);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await api.getHomeData();
-        const sectionFilteredData = getFilteredCategories(data);
-        const filteredData = getSearchFilteredCategories(sectionFilteredData);
-        setCategories(filteredData);
-        if (filteredData.length > 0 && filteredData[0].videos.length > 0) {
-          const nextFeatured = filteredData[0].videos[0];
-          setFeaturedVideo(nextFeatured);
-          setHeroImageSrc(nextFeatured.thumbnail_url || FALLBACK_THUMBNAIL);
-        } else {
-          setFeaturedVideo(null);
-          setHeroImageSrc(FALLBACK_THUMBNAIL);
-        }
-      } catch (err) {
+  const loadCatalog = () => {
+    setLoading(true);
+    setLoadError(false);
+    api
+      .getHomeData()
+      .then(setCategories)
+      .catch((err) => {
         console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [activeSection, searchQuery]);
+        setLoadError(true);
+      })
+      .finally(() => setLoading(false));
+  };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  useEffect(loadCatalog, []);
+
+  const allVideos = useMemo(() => getUniqueVideos(categories), [categories]);
+
+  const heroVideos = useMemo(() => {
+    const programme = categories[0]?.videos.slice(0, HERO_VIDEO_COUNT) || [];
+    const selected = slug ? allVideos.find((video) => video.slug === slug) : undefined;
+    return selected ? [selected, ...programme.filter((video) => video.id !== selected.id)].slice(0, HERO_VIDEO_COUNT) : programme;
+  }, [allVideos, categories, slug]);
+
+  const continueWatching = useMemo(() => {
+    const videosById = new Map<string, Video>(allVideos.map((video) => [video.id, video]));
+    return history.flatMap(({ videoId, position, duration }) => {
+      const video = videosById.get(videoId);
+      if (!video) return [];
+      // Position inconnue pour l'iframe VidMoly : on affiche la durée à la place
+      const hasProgress = position !== undefined && duration !== undefined && duration > 0;
+      return [{
+        video,
+        progress: hasProgress ? position / duration : undefined,
+        caption: hasProgress ? formatRemaining(duration - position) : formatDuration(video.duration),
+      }];
+    });
+  }, [allVideos, history]);
+
+  const listing = useMemo(() => {
+    if (isSearchPage || query) {
+      return { title: query ? `Résultats pour « ${query} »` : 'Rechercher', videos: query ? searchVideos(allVideos, query) : [] };
+    }
+    const label = SECTIONS.find((candidate) => candidate.id === section)?.label || '';
+    return { title: label, videos: getSectionVideos(section, categories, myList.ids) };
+  }, [allVideos, categories, isSearchPage, myList.ids, query, section]);
+
+  const getHeroKicker = (video: Video, index: number) => {
+    const programme = categories[0];
+    const position = programme?.videos.findIndex((candidate) => candidate.id === video.id) ?? -1;
+    if (programme && position >= 0) return `${programme.title} · Épisode ${String(position + 1).padStart(2, '0')}`;
+    return video.genre?.[0] || (index === 0 ? 'À la une' : '');
+  };
+
+  const renderListing = () => {
+    if (isSearchPage && !query) {
+      return <EmptyState title="Que veux-tu regarder ?" text="Cherche un titre, un thème (nutrition, structure…) ou un chapitre." />;
+    }
+    if (listing.videos.length > 0) return <VideoGrid videos={listing.videos} numbered={section === 'programmes' && !query} />;
+    if (query) return <EmptyState title="Aucun résultat" text="Essaie un autre mot-clé ou retourne à l'accueil." />;
+    if (section === 'ma-liste') {
+      return <EmptyState title="Ta liste est vide" text="Ajoute des vidéos avec le bouton + pour les retrouver ici." />;
+    }
+    return <EmptyState title="Rien ici pour l'instant" text="Aucune vidéo n'est encore rattachée à cette section." />;
+  };
 
   return (
-    <div className="min-h-screen bg-background pb-10">
+    <div className="min-h-screen bg-background pb-24 md:pb-0">
       <Navbar />
-      
-      {/* Hero Section */}
-      {featuredVideo && !searchQuery && (
-        <div className="relative h-[56.25vw] md:h-[85vh] w-full">
-           <div className="absolute top-0 left-0 w-full h-full">
-             <img 
-                src={heroImageSrc} 
-                alt={featuredVideo.title}
-                className="w-full h-full object-cover"
-                onError={() => {
-                  if (heroImageSrc !== FALLBACK_THUMBNAIL) {
-                    setHeroImageSrc(FALLBACK_THUMBNAIL);
-                  }
-                }}
-             />
-             <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-transparent to-transparent"></div>
-             <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent"></div>
-           </div>
 
-           <div className="absolute top-[30%] md:top-[40%] left-4 md:left-12 max-w-xl space-y-4">
-              <h1 className="text-3xl md:text-6xl font-extrabold drop-shadow-lg text-white">
-                {featuredVideo.title}
-              </h1>
-              <p className="text-white text-sm md:text-lg drop-shadow-md line-clamp-3">
-                {featuredVideo.description}
-              </p>
-              <div className="flex space-x-3 mt-4">
-                 <button 
-                  onClick={() => navigate(`/watch/${featuredVideo.slug}`)}
-                  className="flex items-center gap-2 bg-white text-black px-6 md:px-8 py-2 md:py-3 rounded font-bold hover:bg-gray-200 transition"
-                 >
-                   <Play className="w-5 h-5 fill-current" /> Play
-                 </button>
-                 <button 
-                  onClick={() => navigate(`/title/${featuredVideo.slug}`)}
-                  className="flex items-center gap-2 bg-gray-500/70 text-white px-6 md:px-8 py-2 md:py-3 rounded font-bold hover:bg-gray-500/50 transition backdrop-blur-sm"
-                 >
-                   <Info className="w-5 h-5" /> More Info
-                 </button>
-              </div>
-           </div>
+      {loading ? (
+        <div className={`flex min-h-screen items-center justify-center ${HEADER_OFFSET_CLASS}`}>
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" role="status" aria-label="Chargement" />
         </div>
+      ) : loadError ? (
+        <main className={`px-4 pb-20 md:px-14 ${HEADER_OFFSET_CLASS}`}>
+          <div className="mt-10 flex flex-col items-center gap-4 rounded-2xl border border-line bg-surface px-6 py-16 text-center">
+            <h1 className="font-display text-2xl font-bold">Impossible de charger le catalogue</h1>
+            <p className="text-muted">Vérifie ta connexion puis réessaie.</p>
+            <button type="button" onClick={loadCatalog} className="h-11 rounded-[10px] bg-white px-6 font-semibold text-background">
+              Réessayer
+            </button>
+          </div>
+        </main>
+      ) : isBrowsing ? (
+        <>
+          <Hero key={heroVideos[0]?.id} videos={heroVideos} getKicker={getHeroKicker} />
+          <main className="flex flex-col gap-12 pb-20 pt-2">
+            {continueWatching.length > 0 && (
+              <Row title="Reprendre la lecture">
+                {continueWatching.map(({ video, progress, caption }) => (
+                  <VideoCard key={video.id} video={video} progress={progress} caption={caption} className="w-[280px] md:w-[340px]" />
+                ))}
+              </Row>
+            )}
+            {categories.map((category, index) => (
+              <Row key={category.id} title={category.title} subtitle={index === 0 ? `${category.videos.length} épisodes` : undefined}>
+                {category.videos.map((video, position) => (
+                  <VideoCard
+                    key={video.id}
+                    video={video}
+                    number={index === 0 ? position + 1 : undefined}
+                    className={index === 0 ? 'w-[300px] md:w-[360px]' : undefined}
+                  />
+                ))}
+              </Row>
+            ))}
+          </main>
+          <footer className="flex flex-wrap justify-between gap-3 border-t border-surface-2 px-4 py-7 text-[13px] text-muted md:px-14">
+            <span>© StreamFLIX</span>
+          </footer>
+        </>
+      ) : (
+        <main className={`px-4 pb-20 md:px-14 ${HEADER_OFFSET_CLASS}`}>
+          <div className="flex flex-col gap-6 pt-6 md:pt-10">
+            {isSearchPage && (
+              <form
+                role="search"
+                className="md:hidden"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const value = new FormData(e.currentTarget).get('q')?.toString().trim() || '';
+                  navigate(value ? `/search?q=${encodeURIComponent(value)}` : '/search');
+                }}
+              >
+                <label className="flex h-12 items-center gap-2.5 rounded-xl border border-line bg-surface px-4 text-muted focus-within:border-zinc-500">
+                  <Search className="h-5 w-5 flex-none" aria-hidden="true" />
+                  <span className="sr-only">Rechercher</span>
+                  <input
+                    key={query}
+                    name="q"
+                    type="search"
+                    defaultValue={query}
+                    autoFocus={!query}
+                    placeholder="Titres, thèmes, chapitres"
+                    className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-hidden placeholder:text-muted"
+                  />
+                </label>
+              </form>
+            )}
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <h1 className="font-display text-3xl font-extrabold tracking-[-0.02em] md:text-4xl">{listing.title}</h1>
+              {listing.videos.length > 0 && (
+                <span className="text-sm text-muted">
+                  {listing.videos.length} vidéo{listing.videos.length > 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+            {renderListing()}
+          </div>
+        </main>
       )}
 
-      <div className="mt-6 md:mt-12 relative z-10 pl-4 md:pl-0 space-y-8">
-        {searchQuery && (
-          <div className="px-4 md:px-12 pt-6">
-            <p className="text-gray-300 text-sm md:text-base">
-              Résultats pour <span className="text-white font-semibold">"{searchParams.get('q')}"</span>
-            </p>
-          </div>
-        )}
-
-        {categories.length > 0 ? (
-          categories.map((cat) => (
-            <Row key={cat.id} title={cat.title} videos={cat.videos} isLarge={cat.slug === 'trending'} />
-          ))
-        ) : (
-          <div className="px-4 md:px-12 py-16 text-center">
-            <h2 className="text-white text-2xl font-bold mb-3">Aucun résultat</h2>
-            <p className="text-gray-400">Essaie une autre recherche ou retourne à l'accueil.</p>
-          </div>
-        )}
-      </div>
+      <MobileTabBar />
     </div>
   );
 };

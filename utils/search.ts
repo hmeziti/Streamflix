@@ -53,3 +53,15 @@ export const filterCategoriesBySearch = (allCategories: Category[], query: strin
     })
     .filter((category) => category.videos.length > 0);
 };
+
+/** Recherche sur tout le catalogue, résultats classés par pertinence puis année. */
+export const searchVideos = (videos: Video[], query: string): Video[] => {
+  const tokens = getSearchTokens(query);
+  if (tokens.length === 0) return [];
+
+  return videos
+    .map((video) => ({ video, score: getVideoSearchScore(video, tokens) }))
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score || b.video.year - a.video.year)
+    .map((item) => item.video);
+};

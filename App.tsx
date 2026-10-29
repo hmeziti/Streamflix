@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { MemoryRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { Watch } from './pages/Watch';
 import { Login } from './pages/Login';
@@ -27,7 +27,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const App = () => {
   return (
-    <MemoryRouter>
+    // HashRouter : l'URL reflète la page (liens partageables, rechargement, bouton retour) sans config serveur
+    <HashRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/watch/:slug" element={
@@ -46,7 +47,7 @@ const App = () => {
           <ProtectedRoute><Home /></ProtectedRoute>
         } />
       </Routes>
-    </MemoryRouter>
+    </HashRouter>
   );
 };
 
