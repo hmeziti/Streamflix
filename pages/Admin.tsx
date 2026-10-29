@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, ArrowLeft, Save, HardDrive, Share2, PlayCircle, Upload, X, Pencil, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
 import { Video } from '../types';
+import { FALLBACK_THUMBNAIL } from '../utils/media';
+import { slugify } from '../utils/slug';
 
 export const Admin = () => {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -17,7 +19,6 @@ export const Admin = () => {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const fallbackThumbnail = 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=800&q=80';
   
   const [formData, setFormData] = useState<Partial<Video>>({
     title: '',
@@ -159,17 +160,17 @@ export const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background pb-10">
-      <div className="bg-[#141414] border-b border-gray-800 p-4 sticky top-0 z-20 flex justify-between items-center">
+      <div className="bg-background border-b border-line p-4 sticky top-0 z-20 flex justify-between items-center">
          <div className="flex items-center gap-4">
              <button onClick={() => navigate('/')} className="text-gray-400 hover:text-white">
                  <ArrowLeft />
              </button>
-             <h1 className="text-xl font-bold text-white">Console Admin</h1>
+             <h1 className="font-display text-xl font-bold text-white">Console admin</h1>
          </div>
          <div className="flex gap-3">
              <button 
                 onClick={() => { resetForm(); setShowForm(true); }}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded hover:bg-red-700 font-bold"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover font-bold"
              >
                 <Plus className="w-4 h-4" />
                 Ajouter
@@ -181,9 +182,9 @@ export const Admin = () => {
          {loading ? (
              <div className="text-center text-gray-400 mt-20">Chargement...</div>
          ) : (
-             <div className="bg-[#2f2f2f] rounded-lg overflow-hidden">
+             <div className="bg-surface-2 rounded-lg overflow-hidden">
                  <table className="w-full text-left text-sm text-gray-300">
-                     <thead className="bg-[#1f1f1f] text-gray-400 uppercase font-medium">
+                     <thead className="bg-surface text-gray-400 uppercase font-medium">
                          <tr>
                              <th className="p-4">Miniature</th>
                              <th className="p-4">Source</th>
@@ -193,11 +194,11 @@ export const Admin = () => {
                              <th className="p-4 text-right">Actions</th>
                          </tr>
                      </thead>
-                     <tbody className="divide-y divide-gray-700">
+                     <tbody className="divide-y divide-line">
                          {videos.map(video => (
-                             <tr key={video.id} className="hover:bg-[#3f3f3f]">
+                             <tr key={video.id} className="hover:bg-surface-2">
                                  <td className="p-4 w-24">
-                                     <img src={video.thumbnail_url || fallbackThumbnail} alt="" className="w-16 h-10 object-cover rounded" onError={(e) => { e.currentTarget.src = fallbackThumbnail; }} />
+                                     <img src={video.thumbnail_url || FALLBACK_THUMBNAIL} alt="" className="w-16 h-10 object-cover rounded" onError={(e) => { e.currentTarget.src = FALLBACK_THUMBNAIL; }} />
                                  </td>
                                  <td className="p-4">
                                      {video.source_type === 'vidmoly' ? (
@@ -245,8 +246,8 @@ export const Admin = () => {
 
       {showForm && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-              <div className="bg-[#1f1f1f] p-8 rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-800">
-                  <h2 className="text-2xl font-bold mb-6">
+              <div className="bg-surface p-8 rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-line">
+                  <h2 className="font-display text-2xl font-bold mb-6">
                     {editingId ? 'Modifier la vidéo' : 'Ajouter une vidéo'}
                   </h2>
                   <form onSubmit={handleSubmit} className="space-y-4">
@@ -255,7 +256,7 @@ export const Admin = () => {
                       <div>
                         <label className="block text-sm text-gray-400 mb-2">Miniature</label>
                         <div 
-                          className={`relative border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center transition-colors ${previewUrl ? 'border-primary bg-black/50' : 'border-gray-600 hover:border-gray-400 hover:bg-[#2a2a2a] cursor-pointer'}`}
+                          className={`relative border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center transition-colors ${previewUrl ? 'border-primary bg-black/50' : 'border-gray-600 hover:border-gray-400 hover:bg-surface-2 cursor-pointer'}`}
                           onClick={() => !previewUrl && fileInputRef.current?.click()}
                           style={{ minHeight: '160px' }}
                         >
@@ -292,7 +293,7 @@ export const Admin = () => {
                         <div className="mt-2 flex items-center gap-2">
                            <span className="text-xs text-gray-500">OU via URL:</span>
                            <input 
-                              className="flex-1 bg-transparent border-b border-gray-700 text-xs text-gray-400 focus:text-white focus:border-white outline-none py-1"
+                              className="flex-1 bg-transparent border-b border-line text-xs text-gray-400 focus:text-white focus:border-white outline-none py-1"
                               placeholder="https://..."
                               value={formData.thumbnail_url}
                               onChange={(e) => {
@@ -306,7 +307,7 @@ export const Admin = () => {
                         </div>
                       </div>
 
-                      <div className="h-px bg-gray-700 my-4"></div>
+                      <div className="h-px bg-line my-4"></div>
 
                       {/* SOURCE SELECTOR */}
                       <div>
@@ -315,21 +316,21 @@ export const Admin = () => {
                               <button 
                                 type="button"
                                 onClick={() => setFormData({...formData, source_type: 'vidmoly'})}
-                                className={`flex flex-col items-center justify-center gap-1 py-2 rounded border text-[10px] ${formData.source_type === 'vidmoly' ? 'border-purple-500 bg-purple-500/10 text-purple-500' : 'border-gray-700 bg-transparent text-gray-500'}`}
+                                className={`flex flex-col items-center justify-center gap-1 py-2 rounded border text-[10px] ${formData.source_type === 'vidmoly' ? 'border-purple-500 bg-purple-500/10 text-purple-500' : 'border-line bg-transparent text-gray-500'}`}
                               >
                                   <PlayCircle className="w-4 h-4" /> VidMoly
                               </button>
                               <button 
                                 type="button"
                                 onClick={() => setFormData({...formData, source_type: 'drive'})}
-                                className={`flex flex-col items-center justify-center gap-1 py-2 rounded border text-[10px] ${formData.source_type === 'drive' ? 'border-blue-500 bg-blue-500/10 text-blue-500' : 'border-gray-700 bg-transparent text-gray-500'}`}
+                                className={`flex flex-col items-center justify-center gap-1 py-2 rounded border text-[10px] ${formData.source_type === 'drive' ? 'border-blue-500 bg-blue-500/10 text-blue-500' : 'border-line bg-transparent text-gray-500'}`}
                               >
                                   <Share2 className="w-4 h-4" /> Google Drive
                               </button>
                               <button 
                                 type="button"
                                 onClick={() => setFormData({...formData, source_type: 'r2'})}
-                                className={`flex flex-col items-center justify-center gap-1 py-2 rounded border text-[10px] ${formData.source_type === 'r2' ? 'border-green-500 bg-green-500/10 text-green-500' : 'border-gray-700 bg-transparent text-gray-500'}`}
+                                className={`flex flex-col items-center justify-center gap-1 py-2 rounded border text-[10px] ${formData.source_type === 'r2' ? 'border-green-500 bg-green-500/10 text-green-500' : 'border-line bg-transparent text-gray-500'}`}
                               >
                                   <HardDrive className="w-4 h-4" /> R2
                               </button>
@@ -338,30 +339,30 @@ export const Admin = () => {
 
                       <div>
                           <label className="block text-sm text-gray-400 mb-1">Titre</label>
-                          <input required className="w-full bg-[#2f2f2f] rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})} />
+                          <input required className="w-full bg-surface-2 rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value, slug: slugify(e.target.value)})} />
                       </div>
                       
                       <div>
                           <label className="block text-sm text-gray-400 mb-1">
                               {formData.source_type === 'vidmoly' ? 'Slug VidMoly' : formData.source_type === 'drive' ? 'ID Google Drive' : 'Clé R2'}
                           </label>
-                          <input required className="w-full bg-[#2f2f2f] rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary font-mono text-sm" placeholder={formData.source_type === 'vidmoly' ? 'ID du lien embed' : ''} value={formData.video_key} onChange={e => setFormData({...formData, video_key: e.target.value})} />
+                          <input required className="w-full bg-surface-2 rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary font-mono text-sm" placeholder={formData.source_type === 'vidmoly' ? 'ID du lien embed' : ''} value={formData.video_key} onChange={e => setFormData({...formData, video_key: e.target.value})} />
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm text-gray-400 mb-1">Année</label>
-                            <input type="number" className="w-full bg-[#2f2f2f] rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary" value={formData.year} onChange={e => setFormData({...formData, year: parseInt(e.target.value)})} />
+                            <input type="number" className="w-full bg-surface-2 rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary" value={formData.year} onChange={e => setFormData({...formData, year: parseInt(e.target.value)})} />
                           </div>
                           <div>
                             <label className="block text-sm text-gray-400 mb-1">Durée (sec)</label>
-                            <input type="number" className="w-full bg-[#2f2f2f] rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary" value={formData.duration} onChange={e => setFormData({...formData, duration: parseInt(e.target.value)})} />
+                            <input type="number" className="w-full bg-surface-2 rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary" value={formData.duration} onChange={e => setFormData({...formData, duration: parseInt(e.target.value)})} />
                           </div>
                       </div>
                       
                       <div>
                           <label className="block text-sm text-gray-400 mb-1">Description</label>
-                          <textarea className="w-full bg-[#2f2f2f] rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary h-20" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                          <textarea className="w-full bg-surface-2 rounded p-2 text-white outline-none focus:ring-1 focus:ring-primary h-20" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
                       </div>
                       
                       <div className="flex justify-end gap-3 mt-6">
@@ -369,7 +370,7 @@ export const Admin = () => {
                           <button 
                             type="submit" 
                             disabled={uploadingImage}
-                            className="px-6 py-2 bg-primary rounded font-bold hover:bg-red-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-6 py-2 bg-primary rounded font-bold hover:bg-primary-hover flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                               {uploadingImage ? (
                                 <>

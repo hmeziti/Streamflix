@@ -1,13 +1,20 @@
 name = "streamflix-api"
 main = "worker.ts"
-compatibility_date = "2023-10-02"
+compatibility_date = "2025-06-01"
+
+[observability]
+enabled = true
 
 [vars]
 SUPABASE_URL = "https://your-project.supabase.co"
-R2_BUCKET_NAME = "streamflix-videos"
+# Origines autorisées (CORS), séparées par des virgules. "*" = toutes.
+ALLOWED_ORIGINS = "*"
 
-# Note: Secrets (keys) should be added via `wrangler secret put`
-# SUPABASE_SERVICE_ROLE_KEY
-# R2_ACCOUNT_ID
-# R2_ACCESS_KEY_ID
-# R2_SECRET_ACCESS_KEY
+# Vidéos (source_type = 'r2') et miniatures uploadées depuis l'admin (préfixe thumbnails/)
+[[r2_buckets]]
+binding = "VIDEOS"
+bucket_name = "streamflix-videos"
+
+# Secrets à ajouter via `wrangler secret put <NOM>` :
+#   SUPABASE_SERVICE_ROLE_KEY
+#   GOOGLE_DRIVE_API_KEY   (optionnel, pour les vidéos Google Drive)

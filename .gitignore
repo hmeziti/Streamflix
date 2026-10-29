@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+.wrangler/
+backend/.dev.vars
+vidmoly-videos.json
+vidmoly-videos.csv
